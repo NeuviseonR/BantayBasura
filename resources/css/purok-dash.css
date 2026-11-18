@@ -1,0 +1,319 @@
+/* ==========================================================================
+   PUROK LEADER DASHBOARD
+   Loads after user-dash.css and reuses its variables, sidebar, header,
+   .stat-card, .column-card, .badge, .circle-icon and list styles.
+   ========================================================================== */
+
+:root {
+  --info-color: #2563eb;
+  --sev-high: #d64545;
+  --sev-medium: rgb(216, 119, 39);
+  --sev-low: #3b8a4a;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* The logout is a form button now, so match the old link look */
+.sidebar-footer form { margin: 0; }
+
+button.logout-btn {
+  width: 100%;
+  background: none;
+  border: none;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+button:focus-visible,
+a:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--secondary-color);
+  outline-offset: 2px;
+}
+
+/* ---------- Title row + purok switcher ---------- */
+.pl-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.purok-select { position: relative; }
+
+.purok-select select {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--dark-text);
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 10px 40px 10px 16px;
+  min-width: 140px;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+
+.purok-select i {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.7rem;
+  pointer-events: none;
+}
+
+/* ---------- Stat cards (4 across) ---------- */
+.stats-grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+.stat-icon.warning {
+  background-color: rgba(243, 202, 67, 0.28);
+  color: #a77a05;
+}
+
+.stat-icon.info {
+  background-color: rgba(37, 99, 235, 0.12);
+  color: var(--info-color);
+}
+
+.stat-info .title { font-weight: 600; }
+
+.trend {
+  font-weight: 700;
+  margin-right: 2px;
+  white-space: nowrap;
+}
+
+.trend i { font-size: 0.65rem; }
+.trend.up   { color: #2f8a3c; }
+.trend.warn { color: var(--secondary-color); }
+
+/* ---------- Main grid ---------- */
+.pl-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.9fr) minmax(0, 1.15fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+.pl-side {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pl-side .column-card { flex: 1; }
+
+.column-header h3 { line-height: 1.3; }
+
+/* ---------- Hotspot map ---------- */
+.map-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 240px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  background-color: #eef0e0;
+}
+
+.hotspot-map {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 240px;
+  object-fit: cover;
+}
+
+.pin { cursor: pointer; transition: transform 0.15s; }
+.pin path { stroke: #ffffff; stroke-width: 1.5; }
+.pin.high path   { fill: var(--sev-high); }
+.pin.medium path { fill: var(--sev-medium); }
+.pin.low path    { fill: var(--sev-low); }
+.pin:hover path,
+.pin:focus path { stroke: var(--dark-text); }
+.pin:focus { outline: none; }
+
+.map-legend {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px;
+  background-color: rgba(255, 255, 255, 0.92);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.map-legend li { display: flex; align-items: center; gap: 8px; }
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot.high   { background-color: var(--sev-high); }
+.dot.medium { background-color: var(--sev-medium); }
+.dot.low    { background-color: var(--sev-low); }
+
+.map-btn {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--dark-text);
+  text-decoration: none;
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-md);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.map-btn:hover {
+  background-color: var(--primary-color);
+  color: var(--light-contrast);
+}
+
+/* ---------- Reports table ---------- */
+.table-scroll { overflow-x: auto; }
+
+.report-table {
+  width: 100%;
+  min-width: 460px;
+  border-collapse: collapse;
+}
+
+.report-table th {
+  padding: 0 8px 10px;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.report-table td {
+  padding: 11px 8px;
+  vertical-align: middle;
+  font-size: 0.8rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.report-table tbody tr:last-child td { border-bottom: none; }
+.report-table tbody tr:hover { background-color: rgba(255, 249, 162, 0.2); }
+
+.rt-report {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 190px;
+}
+
+.rt-title {
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.rt-muted { color: var(--text-muted); white-space: nowrap; }
+
+/* New badge colors (pending / resolved come from user-dash.css) */
+.badge.progress {
+  background-color: rgba(37, 99, 235, 0.12);
+  color: var(--info-color);
+}
+
+.badge.confirmed {
+  background-color: rgba(30, 58, 23, 0.12);
+  color: var(--primary-color);
+}
+
+.badge.scheduled {
+  background-color: rgba(37, 99, 235, 0.12);
+  color: var(--info-color);
+}
+
+/* ---------- Volunteer overview ---------- */
+.vol-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.vol-stat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.vol-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: rgba(30, 58, 23, 0.12);
+  color: var(--primary-color);
+  font-size: 1rem;
+}
+
+.vol-stat div { display: flex; flex-direction: column; min-width: 0; }
+.vol-stat strong { font-size: 1.35rem; line-height: 1.1; }
+.vol-stat span:not(.vol-icon) { font-size: 0.72rem; color: var(--text-muted); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1400px) {
+  .pl-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); }
+
+  .pl-side {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1200px) {
+  .stats-grid.four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 900px) {
+  .pl-grid { grid-template-columns: 1fr; }
+  .pl-side { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+  .stats-grid.four { grid-template-columns: 1fr; }
+  .purok-select { width: 100%; }
+  .purok-select select { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pin, .map-btn { transition: none; }
+}

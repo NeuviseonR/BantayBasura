@@ -1,0 +1,303 @@
+/* ==========================================================================
+   MY REPORTS
+   Loads after user-dash.css and reuses its variables, sidebar, header and badges.
+   ========================================================================== */
+
+.reports-card {
+  background-color: var(--card-bg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* Shared column layout for header + rows */
+.reports-head,
+.report-toggle {
+  display: grid;
+  grid-template-columns: minmax(0, 2.4fr) minmax(110px, 1fr) minmax(90px, 1fr) 110px 24px;
+  align-items: center;
+  column-gap: 16px;
+}
+
+.reports-head {
+  padding: 12px 24px;
+  background-color: var(--bg-main);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* ---------- Rows ---------- */
+.report-row {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.report-row:last-child {
+  border-bottom: none;
+}
+
+.report-toggle {
+  width: 100%;
+  padding: 16px 24px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  text-align: left;
+  color: var(--dark-text);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.report-toggle:hover {
+  background-color: rgba(255, 249, 162, 0.2);
+}
+
+.report-toggle:focus-visible {
+  outline: 3px solid var(--secondary-color);
+  outline-offset: -3px;
+}
+
+.report-row.open > .report-toggle {
+  background-color: rgba(255, 249, 162, 0.25);
+}
+
+.cell {
+  min-width: 0;
+  font-size: 0.85rem;
+}
+
+.cell-title {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cell-date,
+.cell-location {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.cell-date i,
+.cell-location i {
+  color: var(--primary-color);
+  opacity: 0.7;
+  width: 14px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.cell-chevron {
+  text-align: right;
+  font-size: 0.75rem;
+  color: var(--dark-text);
+}
+
+.cell-chevron i {
+  transition: transform 0.25s ease;
+}
+
+.report-row.open .cell-chevron i {
+  transform: rotate(180deg);
+}
+
+/* ---------- Drop-down panel ---------- */
+.report-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
+}
+
+.report-row.open > .report-panel {
+  grid-template-rows: 1fr;
+}
+
+.report-panel-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.report-detail {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 24px;
+  padding: 8px 24px 24px;
+}
+
+.detail-photo {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-main);
+}
+
+.detail-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 24px;
+  margin: 0;
+}
+
+.detail-grid dt {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+.detail-grid dd {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--dark-text);
+  overflow-wrap: anywhere;
+}
+
+.map-link {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--secondary-color);
+  text-decoration: none;
+}
+
+.map-link:hover {
+  text-decoration: underline;
+}
+
+.detail-description h4 {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.detail-description p {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--dark-text);
+  max-width: 68ch;
+}
+
+.detail-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.detail-note.pending {
+  background-color: rgba(216, 119, 39, 0.12);
+  color: var(--dark-text);
+}
+
+.detail-note.pending i {
+  color: var(--secondary-color);
+}
+
+.detail-note.resolved {
+  background-color: rgba(30, 58, 23, 0.1);
+  color: var(--dark-text);
+}
+
+.detail-note.resolved i {
+  color: var(--primary-color);
+}
+
+/* ---------- Empty state ---------- */
+.reports-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 56px 24px;
+  text-align: center;
+}
+
+.reports-empty > i {
+  font-size: 2rem;
+  color: var(--secondary-color);
+  margin-bottom: 4px;
+}
+
+.reports-empty h3 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.reports-empty p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.reports-empty .btn-report {
+  margin-left: 0;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 992px) {
+  .report-detail {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-photo {
+    max-width: 360px;
+  }
+}
+
+@media (max-width: 768px) {
+  .reports-head {
+    display: none;
+  }
+
+  /* Row becomes a two-line card: title + status on top, date and location below */
+  .report-toggle {
+    grid-template-columns: minmax(0, 1fr) auto 20px;
+    grid-template-areas:
+      "title  status chevron"
+      "date   location location";
+    row-gap: 8px;
+    padding: 16px 20px;
+  }
+
+  .cell-title    { grid-area: title; }
+  .cell-status   { grid-area: status; }
+  .cell-chevron  { grid-area: chevron; }
+  .cell-date     { grid-area: date; }
+  .cell-location { grid-area: location; }
+
+  .report-detail {
+    padding: 4px 20px 20px;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .report-panel,
+  .cell-chevron i {
+    transition: none;
+  }
+}
