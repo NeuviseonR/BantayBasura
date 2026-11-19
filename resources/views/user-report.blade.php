@@ -18,7 +18,7 @@
 </head>
 <body>
 
-  @include('partials.sidebar')
+    @include('partials.sidebar')
 
   <div class="main-wrapper">
 

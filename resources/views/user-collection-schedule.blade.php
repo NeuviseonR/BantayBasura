@@ -61,55 +61,7 @@
   @vite(['resources/css/user-dash.css', 'resources/css/user-collection-schedule.css', 'resources/css/custom.css'])
 </head>
 <body>
-
-  <aside class="sidebar">
-    <div>
-      <div class="brand">
-        <div class="brand-logo">
-          <i class="fa-solid fa-leaf"></i>
-        </div>
-        <div class="brand-name">Bantay<br>Basura</div>
-        <button class="mobile-menu-toggle" id="menuToggle">
-          <i class="fa-solid fa-bars"></i>
-        </button>
-      </div>
-
-      <nav>
-        <ul class="nav-list" id="navList">
-          <li class="nav-item">
-            <a href="{{ route('user-dash') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
-          </li>
-          <li class="nav-item">
-            <a href="{{ route('user-report') }}"><i class="fa-solid fa-circle-exclamation"></i> Report a Waste Issue</a>
-          </li>
-          <li class="nav-item">
-            <a href="{{ route('user-my-reports') }}"><i class="fa-regular fa-clipboard"></i> My Reports</a>
-          </li>
-          <li class="nav-item active">
-            <a href="{{ route('user-collection-schedule') }}"><i class="fa-solid fa-calendar"></i> Collection Schedule</a>
-          </li>
-          <li class="nav-item">
-            <a href="{{ route('user-cleanup-drives') }}"><i class="fa-solid fa-people-group"></i> Cleanup Drives</a>
-          </li>
-          <li class="nav-item">
-            <a href="{{ route('user-messages') }}"><i class="fa-regular fa-comment"></i> Messages</a>
-          </li>
-          <li class="nav-item">
-            <a href="{{ route('user-profile') }}"><i class="fa-regular fa-user"></i> Profile</a>
-          </li>
-        </ul>
-      </nav>
-    </div>
-
-    <div class="sidebar-footer">
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="logout-btn">
-            <i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out
-            </button>
-        </form>
-    </div>
-  </aside>
+    @include('partials.sidebar')
 
   <div class="main-wrapper">
 
@@ -141,13 +93,19 @@
 
     <main class="dashboard-content">
 
+    <div class="user-dash-tabs">
+            <a href="{{ route('user-dash') }}"><div class="dash-tab">Home</div></a>
+            <a href="{{ route('user-collection-schedule') }}"><div class="active-tab">Collection Schedule</div></a>
+    </div>
+
       <div class="page-title sched-title">
         <div>
-          <h1>Collection Schedule</h1>
           <p>See when waste is collected in your area, and get reminded before the truck arrives.</p>
         </div>
         <span class="zone-pill"><i class="fa-solid fa-location-dot"></i> Your area: {{ $residentZone }}</span>
       </div>
+
+
 
       <section class="sched-layout">
 

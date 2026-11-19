@@ -304,6 +304,34 @@ overflow: hidden;
 box-shadow: var(--shadow-sm);
 }
 
+.user-dash-tabs{
+    width:  100%;
+    height: fit-content;
+    display: flex;
+    gap: 10px;
+
+    a{
+        text-decoration: none;
+        color: var(--secondary-color);
+        font-family: 'Inter', sans-serif;
+    }
+}
+
+.dash-tab{
+    padding: 10px 15px;
+    background-color: white;
+    border-radius: 20px;
+    border: solid var(--secondary-color) 3px;
+}
+
+.active-tab{
+    padding: 10px 15px;
+    background-color: var(--secondary-color);
+    border-radius: 20px;
+    border: solid var(--secondary-color) 3px;
+    color: white;
+}
+
 .hero-content {
 max-width: 500px;
 z-index: 2;
