@@ -46,6 +46,12 @@
     ],
   ];
 @endphp
+@php
+  $reportCollection = collect($reports);
+  $totalReports = $reportCollection->count();
+  $pendingReports = $reportCollection->filter(fn ($report) => strtolower($report['status'] ?? '') === 'pending')->count();
+  $resolvedReports = $reportCollection->filter(fn ($report) => strtolower($report['status'] ?? '') === 'resolved')->count();
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -93,12 +99,36 @@
 
     <main class="dashboard-content">
 
-      <div class="page-title">
-        <h1>My Reports</h1>
-        <p>Every waste issue you've reported. Select a report to see its full details.</p>
+      <div class="reports-page-heading">
+        <div class="page-title">
+          <span class="eyebrow"><i class="fa-solid fa-clipboard-list"></i> REPORT ACTIVITY</span>
+          <h1>My Reports</h1>
+          <p>Keep track of the waste concerns you've submitted and check their latest status.</p>
+        </div>
+        <a href="{{ route('user-report') }}" class="reports-create-btn"><i class="fa-solid fa-plus"></i> New report</a>
       </div>
 
-      <section class="reports-card">
+      <section class="report-summary" aria-label="Report summary">
+        <article class="summary-card summary-total">
+          <span class="summary-icon"><i class="fa-solid fa-folder-open"></i></span>
+          <div><span class="summary-label">Total reports</span><strong>{{ $totalReports }}</strong><small>All submitted concerns</small></div>
+        </article>
+        <article class="summary-card summary-pending">
+          <span class="summary-icon"><i class="fa-regular fa-clock"></i></span>
+          <div><span class="summary-label">Pending</span><strong>{{ $pendingReports }}</strong><small>Awaiting action</small></div>
+        </article>
+        <article class="summary-card summary-resolved">
+          <span class="summary-icon"><i class="fa-regular fa-circle-check"></i></span>
+          <div><span class="summary-label">Resolved</span><strong>{{ $resolvedReports }}</strong><small>Completed concerns</small></div>
+        </article>
+      </section>
+
+      <section class="reports-section">
+        <div class="reports-section-heading">
+          <div><h2>Submitted reports</h2><p>Select a report to view its details and location.</p></div>
+          <span class="reports-count">{{ $totalReports }} {{ $totalReports === 1 ? 'report' : 'reports' }}</span>
+        </div>
+        <section class="reports-card">
 
         {{-- Column labels (desktop only) --}}
         <div class="reports-head" aria-hidden="true">
@@ -112,7 +142,7 @@
         @forelse ($reports as $i => $r)
           <article class="report-row">
             <button type="button" class="report-toggle" aria-expanded="false" aria-controls="report-panel-{{ $i }}" id="report-btn-{{ $i }}">
-              <span class="cell cell-title">{{ $r['title'] }}</span>
+              <span class="cell cell-title"><span class="report-type-icon"><i class="fa-solid fa-recycle"></i></span><span class="report-title-text">{{ $r['title'] }}<small>{{ $r['id'] }} · {{ $r['category'] }}</small></span></span>
               <span class="cell cell-date"><i class="fa-regular fa-calendar"></i>{{ $r['date'] }}</span>
               <span class="cell cell-location"><i class="fa-solid fa-location-dot"></i>{{ $r['location'] }}</span>
               <span class="cell cell-status">
@@ -168,10 +198,11 @@
             <i class="fa-regular fa-clipboard"></i>
             <h3>No reports yet</h3>
             <p>When you report a waste issue, it will show up here.</p>
-            <a href="#" class="btn-report"><i class="fa-solid fa-plus"></i> Report a Waste Issue</a>
+            <a href="{{ route('user-report') }}" class="btn-report"><i class="fa-solid fa-plus"></i> Report a Waste Issue</a>
           </div>
         @endforelse
 
+        </section>
       </section>
 
     </main>

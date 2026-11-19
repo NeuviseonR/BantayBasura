@@ -22,7 +22,7 @@
           <a href="{{ route('user-my-reports') }}"><i class="fa-regular fa-clipboard"></i> My Reports</a>
         </li>
         <li class="nav-item {{ request()->routeIs('user-cleanup-drives') ? 'active' : '' }}">
-          <a href="{{ route('user-cleanup-drives') }}"><i class="fa-solid fa-people-group"></i> Cleanup Drivessss</a>
+          <a href="{{ route('user-cleanup-drives') }}"><i class="fa-solid fa-people-group"></i> Cleanup Drives</a>
         </li>
         <li class="nav-item {{ request()->routeIs('user-messages') ? 'active' : '' }}">
           <a href="{{ route('user-messages') }}"><i class="fa-regular fa-comment"></i> Messages</a>
