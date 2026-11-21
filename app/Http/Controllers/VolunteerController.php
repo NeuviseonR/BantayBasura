@@ -163,16 +163,18 @@ class VolunteerController extends Controller
     {
         $this->leader();
         abort_unless(in_array($side, ['front', 'back']), 404);
-        abort_unless($this->authenticatedUser()->role === 'admin' || !$this->authenticatedUser()->barangay_id || $application->user->barangay_id === $this->authenticatedUser()->barangay_id, 403);
+        abort_unless($this->authenticatedUser()->role === 'admin' || ($this->authenticatedUser()->barangay_id && $application->user->barangay_id === $this->authenticatedUser()->barangay_id), 403);
         $path = $side === 'front' ? $application->id_front_path : $application->id_back_path;
         abort_if(!$path, 404);
-        return response()->download(storage_path('app/private/' . $path));
+        abort_unless(Storage::disk('local')->exists($path), 404);
+        return Storage::disk('local')->download($path, basename($path));
     }
     public function reviewApplications()
     {
         $this->leader();
         $q = VolunteerApplication::with('user')->where('status', 'pending');
-        if ($this->authenticatedUser()->role !== 'admin' && $this->authenticatedUser()->barangay_id) {
+        if ($this->authenticatedUser()->role !== 'admin') {
+            abort_unless($this->authenticatedUser()->barangay_id, 403, 'Leader account must be assigned to a barangay.');
             $q->whereHas('user', fn($u) => $u->where('barangay_id', $this->authenticatedUser()->barangay_id));
         }
         $apps = $q->latest()->get();
@@ -181,7 +183,7 @@ class VolunteerController extends Controller
     public function review(Request $r, VolunteerApplication $application)
     {
         $this->leader();
-        abort_unless($this->authenticatedUser()->role === 'admin' || !$this->authenticatedUser()->barangay_id || $application->user->barangay_id === $this->authenticatedUser()->barangay_id, 403);
+        abort_unless($this->authenticatedUser()->role === 'admin' || ($this->authenticatedUser()->barangay_id && $application->user->barangay_id === $this->authenticatedUser()->barangay_id), 403);
         $data = $r->validate(['decision' => 'required|in:approve,reject', 'review_notes' => 'nullable|string|max:1000']);
         DB::transaction(function () use ($r, $application, $data) {
             $application->update(['status' => $data['decision'] === 'approve' ? 'approved' : 'rejected', 'reviewed_by' => Auth::id(), 'reviewed_at' => now(), 'review_notes' => $data['review_notes'] ?? null]);
@@ -193,7 +195,7 @@ class VolunteerController extends Controller
     }
     private function leader()
     {
-        abort_unless(in_array($this->authenticatedUser()->role, ['official', 'admin', 'purok_leader']), 403, 'Purok Leader access required.');
+        abort_unless(in_array($this->authenticatedUser()->role, ['leader', 'admin']), 403, 'Purok Leader access required.');
     }
     public static function verifyRegistration(CleanupDriveRegistration $reg, string $method)
     {

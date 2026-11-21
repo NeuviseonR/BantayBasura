@@ -1,0 +1,98 @@
+/* Purok Leader · Database Cleanup Activities page
+Scoped to this page only; follows design.md palette and spacing. */
+.purok-activities-db {
+--pa-green: var(--primary-color, #1E3A17);
+--pa-orange: var(--secondary-color, #D87727);
+--pa-text: var(--dark-text, #112E11);
+--pa-muted: var(--text-muted, rgba(17, 46, 17, .7));
+--pa-border: var(--border-color, rgba(30, 58, 23, .15));
+--pa-surface: var(--card-bg, #fff);
+--pa-radius: var(--radius-md, 12px);
+max-width: 1440px;
+margin: 0 auto;
+color: var(--pa-text);
+font-family: Inter, Arial, Helvetica, sans-serif;
+}
+.purok-activities-db .page-heading { margin-bottom: 18px; }
+.purok-activities-db .page-heading h1 { margin: 0 0 6px; font-size: clamp(1.35rem, 2vw, 1.75rem); line-height: 1.25; }
+.purok-activities-db .page-heading p { max-width: 680px; margin: 0; line-height: 1.5; }
+.purok-activities-db .notice { padding: 11px 14px; border-radius: 9px; }
+.purok-activities-db .code-notice { display: flex; align-items: flex-start; gap: 16px; background: #fff9e7; border: 1px
+solid #e7cd76; border-left: 4px solid var(--pa-orange); border-radius: 10px; padding: 16px; margin: 0 0 18px; }
+.purok-activities-db .code-notice h2 { margin: 0 0 6px; font-size: 1rem; }
+.purok-activities-db .code-notice p { margin: 0; color: var(--pa-muted); font-size: .86rem; }
+.purok-activities-db .generated-code { display: inline-block; font-size: clamp(1.25rem, 3vw, 1.65rem); font-weight: 750;
+letter-spacing: .16em; color: var(--pa-green); padding: 8px 0 12px; }
+.purok-activities-db #qrDisplay { display: inline-flex; padding: 8px; background: #fff; border: 1px solid
+var(--pa-border); border-radius: 8px; margin: 0 0 10px; }
+.purok-activities-db #qrDisplay img { display: block; max-width: 100%; height: auto; }
+.purok-activities-db .form-card { margin: 0 0 22px; padding: 18px; border: 1px solid var(--pa-border); border-radius:
+var(--pa-radius); background: var(--pa-surface); box-shadow: var(--shadow-sm, 0 1px 3px rgba(17,46,17,.06)); }
+.purok-activities-db .form-card h2 { display: flex; align-items: center; gap: 9px; margin: 0 0 14px; font-size: 1.05rem;
+}
+.purok-activities-db .form-card h2 i { color: var(--pa-orange); }
+.purok-activities-db .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; }
+.purok-activities-db .form-grid label { min-width: 0; color: var(--pa-text); font-size: .82rem; font-weight: 650; gap:
+5px; }
+.purok-activities-db .form-grid input,
+.purok-activities-db .form-grid select,
+.purok-activities-db .form-grid textarea { box-sizing: border-box; min-height: 40px; width: 100%; border: 1px solid
+var(--pa-border); border-radius: 8px; background: #fff; color: var(--pa-text); padding: 9px 11px; font: 400 .88rem
+Inter, Arial, sans-serif; }
+.purok-activities-db .form-grid textarea { min-height: 86px; resize: vertical; }
+.purok-activities-db .form-grid input:focus,
+.purok-activities-db .form-grid select:focus,
+.purok-activities-db .form-grid textarea:focus,
+.purok-activities-db .inline-update select:focus { outline: 3px solid rgba(216,119,39,.22); border-color:
+var(--pa-orange); }
+.purok-activities-db .form-grid .wide { grid-column: 1 / -1; }
+.purok-activities-db .form-grid .wide button { margin-top: 2px; }
+.purok-activities-db .btn { min-height: 36px; padding: 8px 12px; border-radius: 8px; font-size: .8rem; font-weight: 650;
+transition: background-color .15s, border-color .15s, transform .15s; }
+.purok-activities-db .btn.primary { background: var(--pa-green); color: #fff; }
+.purok-activities-db .btn.primary:hover { background: #274c20; }
+.purok-activities-db .btn.secondary { background: #fff; color: var(--pa-green); border-color: var(--pa-border); }
+.purok-activities-db .btn.secondary:hover { background: #f5f8f3; border-color: var(--pa-green); }
+.purok-activities-db .btn:focus-visible { outline: 3px solid rgba(216,119,39,.4); outline-offset: 2px; }
+.purok-activities-db .section-title { margin: 0 0 12px; font-size: 1.08rem; }
+.purok-activities-db .drive-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px;
+align-items: start; }
+.purok-activities-db .drive-card { display: flex; flex-direction: column; gap: 0; min-width: 0; padding: 16px; border:
+1px solid var(--pa-border); border-radius: var(--pa-radius); background: var(--pa-surface); box-shadow: var(--shadow-sm,
+0 1px 3px rgba(17,46,17,.06)); }
+.purok-activities-db .drive-card-top { display: flex; align-items: center; flex-wrap: wrap; justify-content:
+space-between; gap: 7px; }
+.purok-activities-db .status { padding: 4px 8px; font-size: .72rem; }
+.purok-activities-db .slots { color: var(--pa-muted); font-size: .75rem; font-weight: 600; }
+.purok-activities-db .drive-card h2 { margin: 11px 0 5px; font-size: 1rem; line-height: 1.35; overflow-wrap: anywhere; }
+.purok-activities-db .drive-card > p { color: var(--pa-muted); font-size: .82rem; line-height: 1.5; margin: 0;
+overflow-wrap: anywhere; }
+.purok-activities-db .drive-meta { display: grid; gap: 7px; margin: 12px 0; padding: 0; list-style: none; color:
+var(--pa-muted); font-size: .78rem; }
+.purok-activities-db .drive-meta li { display: flex; align-items: flex-start; gap: 7px; overflow-wrap: anywhere; }
+.purok-activities-db .drive-meta i { flex: 0 0 16px; width: 16px; margin-top: 2px; color: var(--pa-orange); }
+.purok-activities-db .card-actions { display: grid; grid-template-columns: 1fr; gap: 7px; margin: 0 0 12px; }
+.purok-activities-db .card-actions > * { min-width: 0; }
+.purok-activities-db .card-actions form { margin: 0; }
+.purok-activities-db .card-actions .btn { width: 100%; box-sizing: border-box; }
+.purok-activities-db .inline-update { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; border-top: 1px
+solid var(--pa-border); padding-top: 11px; margin-top: auto; }
+.purok-activities-db .inline-update label { display: flex; align-items: center; gap: 7px; flex: 1 1 130px; color:
+var(--pa-muted); font-size: .76rem; font-weight: 650; }
+.purok-activities-db .inline-update select { min-width: 0; flex: 1; width: auto; padding: 7px 9px; border: 1px solid
+var(--pa-border); border-radius: 7px; background: #fff; color: var(--pa-text); font: 400 .8rem Inter, Arial, sans-serif;
+}
+.purok-activities-db .empty-state { border: 1px dashed var(--pa-border); border-radius: var(--pa-radius); background:
+#fff; padding: 28px 16px; }
+.purok-activities-db .empty-state i { color: var(--pa-orange); font-size: 1.45rem; }
+.purok-activities-db .empty-state h3 { margin: 9px 0 5px; color: var(--pa-text); font-size: .98rem; }
+.purok-activities-db .empty-state p { margin: 0; color: var(--pa-muted); font-size: .84rem; }
+@media (max-width: 1180px) { .purok-activities-db .drive-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 760px) {
+.purok-activities-db .form-card { padding: 15px; }
+.purok-activities-db .drive-grid { grid-template-columns: 1fr; }
+.purok-activities-db .form-grid { grid-template-columns: 1fr; }
+.purok-activities-db .form-grid .wide { grid-column: auto; }
+.purok-activities-db .code-notice { flex-direction: column; }
+.purok-activities-db .inline-update label { flex-basis: 100%; }
+}

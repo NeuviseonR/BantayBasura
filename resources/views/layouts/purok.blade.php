@@ -1,6 +1,9 @@
 @php
   // Sample leader. Later, build this from the logged-in user.
-  $leader = $leader ?? ['name' => 'Ana Santos', 'initials' => 'AS', 'purok' => 'Purok 3'];
+  $authUser = auth()->user();
+  $displayName = $authUser?->name ?? 'Purok Leader';
+  $initials = collect(explode(' ', trim($displayName)))->filter()->take(2)->map(fn($part) => strtoupper(substr($part, 0, 1)))->implode('');
+  $leader = $leader ?? ['name' => $displayName, 'initials' => $initials ?: 'PL', 'purok' => $authUser?->zone ?? 'Purok'];
 
   $hour = now()->hour; // set 'timezone' => 'Asia/Manila' in config/app.php
   $greeting = $hour < 12 ? 'Good morning' : ($hour < 18 ? 'Good afternoon' : 'Good evening');

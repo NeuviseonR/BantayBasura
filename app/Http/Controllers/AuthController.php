@@ -19,7 +19,7 @@ class AuthController extends Controller
     public function showLogin()
     {
         if (Auth::check()) {
-            return redirect()->route('user-dash');
+            return $this->dashboardRedirect(Auth::user());
         }
 
         return view('login', [
@@ -40,12 +40,17 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            return redirect()->intended(route('user-dash'));
+            return $this->dashboardRedirect(Auth::user());
         }
 
         return back()
             ->withErrors(['email' => 'That email and password don\'t match our records.'])
             ->onlyInput('email');
+    }
+
+    private function dashboardRedirect($user)
+    {
+        return redirect()->route($user->role === 'leader' || $user->role === 'admin' ? 'purok-dash' : 'user-dash');
     }
 
     public function register(Request $request)
