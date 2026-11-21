@@ -1,11 +1,10 @@
 @php
-  // Sample leader. Later, build this from the logged-in user.
-  $authUser = auth()->user();
-  $displayName = $authUser?->name ?? 'Purok Leader';
-  $initials = collect(explode(' ', trim($displayName)))->filter()->take(2)->map(fn($part) => strtoupper(substr($part, 0, 1)))->implode('');
-  $leader = $leader ?? ['name' => $displayName, 'initials' => $initials ?: 'PL', 'purok' => $authUser?->zone ?? 'Purok'];
-
-  $hour = now()->hour; // set 'timezone' => 'Asia/Manila' in config/app.php
+  $account = auth()->user();
+  $displayName = $account?->name ?? 'Purok Leader';
+  $initials = collect(preg_split('/\\s+/', trim($displayName)))->filter()->take(2)->map(fn ($part) => mb_substr($part, 0, 1))->implode('');
+  $barangayName = $account?->barangay?->name ?? $account?->zone ?? 'Assigned area';
+  $leader = $leader ?? ['name' => $displayName, 'initials' => $initials ?: 'PL', 'purok' => $barangayName];
+  $hour = now()->hour;
   $greeting = $hour < 12 ? 'Good morning' : ($hour < 18 ? 'Good afternoon' : 'Good evening');
 @endphp
 <!DOCTYPE html>
@@ -20,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  @vite(['resources/css/user-dash.css', 'resources/css/purok-dash.css', 'resources/css/purok-pages.css', 'resources/css/custom.css'])
+  @vite(['resources/css/user-dash.css', 'resources/css/purok-dash.css', 'resources/css/purok-pages.css', 'resources/css/custom.css', 'resources/css/purok-activities-db.css'])
 </head>
 <body>
 

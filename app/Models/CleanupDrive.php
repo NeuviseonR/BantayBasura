@@ -4,8 +4,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 class CleanupDrive extends Model {
- protected $fillable=['title','description','location','start_at','end_at','slots','organizer_id','barangay_id','attendance_code_hash','status'];
+ protected $fillable=['title','description','location','latitude','longitude','start_at','end_at','slots','organizer_id','barangay_id','attendance_code_hash','status'];
  protected $casts=['start_at'=>'datetime','end_at'=>'datetime'];
+ public function getStatusAttribute($stored): string {
+  if ($stored === 'cancelled') return 'cancelled';
+  if (!$this->start_at || !$this->end_at) return $stored ?: 'scheduled';
+  if (now()->lt($this->start_at)) return 'scheduled';
+  if (now()->lt($this->end_at)) return 'ongoing';
+  return 'completed';
+ }
  public function organizer():BelongsTo{return $this->belongsTo(User::class,'organizer_id');}
  public function registrations():HasMany{return $this->hasMany(CleanupDriveRegistration::class);}
 }

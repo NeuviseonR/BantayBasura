@@ -19,6 +19,7 @@ export default defineConfig({
                 'resources/css/user-messages.css',
                 'resources/css/user-profile.css',
                 'resources/css/purok-pages.css',
+                'resources/css/purok-activities-db.css',
             ],
             refresh: true,
             fonts: [

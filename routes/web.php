@@ -26,6 +26,8 @@ Route::view('/index', 'index')->name('index');
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:6,1')->name('login.attempt');
 Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1')->name('register');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
 // Forgot / reset password (these route names are required by Laravel's reset email)
 Route::get('/forgot-password', [PasswordResetController::class, 'showForgot'])->name('password.request');
 Route::post('/forgot-password', [PasswordResetController::class, 'sendLink'])->middleware('throttle:6,1')->name('password.email');
@@ -74,12 +76,14 @@ Route::middleware('auth')->group(function () {
 | Purok Leader pages
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'leader'])->group(function () {
+Route::middleware('auth')->group(function () {
     Route::view('/purok-dash', 'purok-dash')->name('purok-dash');
     Route::view('/purok-reports', 'purok-reports')->name('purok-reports');
     Route::get('/purok-activities', [CleanupDriveLeaderController::class, 'index'])->name('purok-activities-db');
     Route::post('/purok-activities', [CleanupDriveLeaderController::class, 'store'])->name('purok-activities-db.store');
     Route::put('/purok-activities/{drive}', [CleanupDriveLeaderController::class, 'update'])->name('purok-activities-db.update');
+    Route::post('/purok-activities/{drive}/cancel', [CleanupDriveLeaderController::class, 'cancel'])->name('purok-activities-db.cancel');
+    Route::put('/purok-activities/participants/{registration}', [CleanupDriveLeaderController::class, 'updateParticipant'])->name('purok-activities-db.participant.update');
     Route::post('/purok-activities/{drive}/attendance-code', [CleanupDriveLeaderController::class, 'regenerate'])->name('purok-activities-db.code');
     Route::post('/purok-activities/registrations/{registration}/verify-photo', [CleanupDriveLeaderController::class, 'verifyPhoto'])->name('purok-activities-db.verify-photo');
     Route::get('/purok-activities/{drive}', [CleanupDriveLeaderController::class, 'show'])->name('purok-activities-db.show');
