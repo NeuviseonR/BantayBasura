@@ -18,8 +18,8 @@
         <li class="nav-item {{ request()->routeIs('purok-reports') ? 'active' : '' }}">
           <a href="{{ route('purok-reports') }}"><i class="fa-regular fa-clipboard"></i> Waste Reports</a>
         </li>
-        <li class="nav-item {{ request()->routeIs('purok-activities') ? 'active' : '' }}">
-          <a href="{{ route('purok-activities') }}"><i class="fa-solid fa-people-group"></i> Cleanup Activities</a>
+        <li class="nav-item {{ request()->routeIs('purok-activities-db*') ? 'active' : '' }}">
+          <a href="{{ route('purok-activities-db') }}"><i class="fa-solid fa-people-group"></i> Cleanup Activities</a>
         </li>
         <li class="nav-item {{ request()->routeIs('purok-overview') ? 'active' : '' }}">
           <a href="{{ route('purok-overview') }}"><i class="fa-solid fa-location-dot"></i> Purok Overview</a>

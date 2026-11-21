@@ -12,26 +12,9 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = [
-        'name',
-        'first_name',
-        'middle_name',
-        'last_name',
-        'birthdate',
-        'sex',
-        'mobile',
-        'barangay_id',
-        'zone',
-        'address',
-        'role',
-        'email',
-        'password',
-    ];
+    protected $fillable = ['name', 'first_name', 'middle_name', 'last_name', 'birthdate', 'sex', 'mobile', 'barangay_id', 'zone', 'address', 'role', 'email', 'password', 'volunteer_points'];
 
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    protected $hidden = ['password', 'remember_token'];
 
     protected $casts = [
         'birthdate' => 'date',
@@ -48,8 +31,25 @@ class User extends Authenticatable
         return $this->hasMany(WasteReport::class);
     }
 
+    public function volunteerApplications(): HasMany
+    {
+        return $this->hasMany(VolunteerApplication::class);
+    }
+    public function cleanupRegistrations(): HasMany
+    {
+        return $this->hasMany(CleanupDriveRegistration::class, 'volunteer_id');
+    }
+    public function pointTransactions(): HasMany
+    {
+        return $this->hasMany(VolunteerPointTransaction::class, 'volunteer_id');
+    }
+
     public function isResident(): bool
     {
         return $this->role === 'resident';
+    }
+    public function isVolunteer(): bool
+    {
+        return $this->role === 'volunteer';
     }
 }

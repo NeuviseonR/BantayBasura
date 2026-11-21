@@ -70,7 +70,7 @@
       <div class="user-greeting">
         <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=120" alt="Maria Lopez" class="avatar-img" onerror="this.src='https://placehold.co/80x80/1e3a17/fff9a2?text=ML'">
         <div class="greeting-text">
-          <h2>Hello, Maria Lopez!</h2>
+          <h2>Hello, {{ auth()->user()->name }}!</h2>
         </div>
       </div>
 
@@ -83,8 +83,8 @@
         <div class="profile-pill">
           <div class="avatar-initials">ML</div>
           <div class="profile-info">
-            <div class="name">Maria Lopez</div>
-            <div class="role">Resident</div>
+            <div class="name">{{ auth()->user()->name }}</div>
+            <div class="role">{{ auth()->user()->role }}</div>
           </div>
           <i class="fa-solid fa-chevron-down dropdown-icon"></i>
         </div>
