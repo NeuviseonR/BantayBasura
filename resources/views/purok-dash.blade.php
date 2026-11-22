@@ -186,17 +186,6 @@
                     <h1>Purok Leader Dashboard</h1>
                     <p>Monitor waste reports, coordinate cleanup activities, and keep your purok clean and green.</p>
                 </div>
-
-                <div class="purok-select">
-                    <label for="purokSelect" class="sr-only">Choose purok</label>
-                    <select id="purokSelect">
-                        @foreach ($puroks as $p)
-                            <option value="{{ $p }}" @selected($p === $leader['purok'])>{{ $p }}
-                            </option>
-                        @endforeach
-                    </select>
-                    <i class="fa-solid fa-chevron-down"></i>
-                </div>
             </div>
 
             {{-- ================= Stat cards ================= --}}

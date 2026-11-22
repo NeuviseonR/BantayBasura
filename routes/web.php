@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\WasteReportController;
+use App\Http\Controllers\ResidentDashboardController;
 use App\Http\Controllers\VolunteerController;
 use App\Http\Controllers\CleanupDriveLeaderController;
 
@@ -44,7 +45,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
-    Route::view('/user-dash', 'user-dash')->name('user-dash');
+    Route::get('/user-dash', [ResidentDashboardController::class, 'index'])->name('user-dash');
 
     // Sending a report
     Route::get('/user-report', [WasteReportController::class, 'create'])->name('user-report');

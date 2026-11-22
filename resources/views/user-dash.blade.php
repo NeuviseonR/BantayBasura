@@ -114,7 +114,7 @@
                     </div>
                     <div class="stat-info">
                         <div class="title">My Reports</div>
-                        <div class="count">3</div>
+                        <div class="count">{{ $reportStats['total'] }}</div>
                         <div class="subtitle">Total Reports</div>
                     </div>
                 </div>
@@ -126,7 +126,7 @@
                     </div>
                     <div class="stat-info">
                         <div class="title">Pending</div>
-                        <div class="count">1</div>
+                        <div class="count">{{ $reportStats['pending'] }}</div>
                         <div class="subtitle">Awaiting Verification</div>
                     </div>
                 </div>
@@ -138,7 +138,7 @@
                     </div>
                     <div class="stat-info">
                         <div class="title">Resolved</div>
-                        <div class="count">2</div>
+                        <div class="count">{{ $reportStats['resolved'] }}</div>
                         <div class="subtitle">Completed</div>
                     </div>
                 </div>
@@ -151,50 +151,37 @@
                 <div class="column-card">
                     <div class="column-header">
                         <h3>My Recent Reports</h3>
-                        <a href="#" class="view-all">View All</a>
+                        <a href="{{ route('user-my-reports') }}" class="view-all">View All</a>
                     </div>
                     <div class="list-items">
-                        <!-- Item 1 -->
-                        <div class="list-item">
-                            <div class="item-main">
-                                <img src="https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?auto=format&fit=crop&q=80&w=100"
-                                    alt="Plastic Waste" class="report-thumb"
-                                    onerror="this.src='https://placehold.co/100x100/1e3a17/fff9a2?text=Issue'">
+                        @forelse ($recentReports as $report)
+                            @php
+                                $statusClass = match (strtolower($report->status)) {
+                                    'pending' => 'pending',
+                                    'resolved' => 'resolved',
+                                    default => 'pending',
+                                };
+                                $statusLabel = ucwords(str_replace('_', ' ', $report->status));
+                            @endphp
+                            <div class="list-item">
+                                <div class="item-main">
+                                    <img src="{{ $report->photo_url }}" alt="{{ $report->title }}" class="report-thumb"
+                                        onerror="this.src='https://placehold.co/100x100/1e3a17/fff9a2?text=Issue'">
+                                    <div class="item-details">
+                                        <div class="item-title">{{ $report->title }}</div>
+                                        <div class="item-subtext">{{ $report->zone ?: 'Zone not specified' }} &bull; {{ $report->created_at->format('M d, Y') }}</div>
+                                    </div>
+                                </div>
+                                <span class="badge {{ $statusClass }}">{{ $statusLabel }}</span>
+                            </div>
+                        @empty
+                            <div class="list-item">
                                 <div class="item-details">
-                                    <div class="item-title">Plastic waste on the sidewalk</div>
-                                    <div class="item-subtext">Zone 2 • Apr 27, 2025</div>
+                                    <div class="item-title">No reports yet</div>
+                                    <div class="item-subtext">Your submitted waste reports will appear here.</div>
                                 </div>
                             </div>
-                            <span class="badge pending">Pending</span>
-                        </div>
-
-                        <!-- Item 2 -->
-                        <div class="list-item">
-                            <div class="item-main">
-                                <img src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&q=80&w=100"
-                                    alt="Broken Trash Bin" class="report-thumb"
-                                    onerror="this.src='https://placehold.co/100x100/1e3a17/fff9a2?text=Issue'">
-                                <div class="item-details">
-                                    <div class="item-title">Broken trash bin</div>
-                                    <div class="item-subtext">Zone 1 • Apr 22, 2025</div>
-                                </div>
-                            </div>
-                            <span class="badge resolved">Resolved</span>
-                        </div>
-
-                        <!-- Item 3 -->
-                        <div class="list-item">
-                            <div class="item-main">
-                                <img src="https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&q=80&w=100"
-                                    alt="Illegal Dumping" class="report-thumb"
-                                    onerror="this.src='https://placehold.co/100x100/1e3a17/fff9a2?text=Issue'">
-                                <div class="item-details">
-                                    <div class="item-title">Illegal dumping</div>
-                                    <div class="item-subtext">Zone 3 • Apr 15, 2025</div>
-                                </div>
-                            </div>
-                            <span class="badge resolved">Resolved</span>
-                        </div>
+                        @endforelse
                     </div>
                 </div>
 
@@ -202,7 +189,7 @@
                 <div class="column-card">
                     <div class="column-header">
                         <h3>Collection Schedule</h3>
-                        <a href="#" class="view-all">View All</a>
+                        <a href="{{ route('user-cleanup-drives') }}" class="view-all">View All</a>
                     </div>
                     <div class="list-items">
                         <div class="list-item">
@@ -247,44 +234,31 @@
                 <div class="column-card">
                     <div class="column-header">
                         <h3>Upcoming Cleanup Drives</h3>
-                        <a href="#" class="view-all">View All</a>
+                        <a href="{{ route('user-collection-schedule') }}" class="view-all">View All</a>
                     </div>
                     <div class="list-items">
-                        <div class="list-item">
-                            <div class="item-main">
-                                <div class="circle-icon">
-                                    <i class="fa-regular fa-calendar-check"></i>
-                                </div>
-                                <div class="item-details">
-                                    <div class="item-title">Community Clean-up</div>
-                                    <div class="item-subtext">Apr 30, 2025 • Zone 2</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="list-item">
-                            <div class="item-main">
-                                <div class="circle-icon">
-                                    <i class="fa-solid fa-clipboard-list"></i>
-                                </div>
-                                <div class="item-details">
-                                    <div class="item-title">Beach Clean-up</div>
-                                    <div class="item-subtext">May 5, 2025 • Zone 4</div>
+                        @forelse ($upcomingDrives as $drive)
+                            <div class="list-item">
+                                <div class="item-main">
+                                    <div class="circle-icon">
+                                        <i class="fa-regular fa-calendar-check"></i>
+                                    </div>
+                                    <div class="item-details">
+                                        <div class="item-title">{{ $drive->title }}</div>
+                                        <div class="item-subtext">
+                                            {{ $drive->start_at->format('M d, Y') }} &bull; {{ $drive->location }}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="list-item">
-                            <div class="item-main">
-                                <div class="circle-icon">
-                                    <i class="fa-solid fa-tree"></i>
-                                </div>
+                        @empty
+                            <div class="list-item">
                                 <div class="item-details">
-                                    <div class="item-title">Tree Planting</div>
-                                    <div class="item-subtext">May 10, 2025 • Zone 3</div>
+                                    <div class="item-title">No upcoming cleanup drives</div>
+                                    <div class="item-subtext">Check back later for newly scheduled community activities.</div>
                                 </div>
                             </div>
-                        </div>
+                        @endforelse
                     </div>
                 </div>
 
