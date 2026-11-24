@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\WasteReport;
+use App\Services\NominatimGeocodingService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -24,7 +25,7 @@ class WasteReportController extends Controller
         return view('user-report', ['categories' => self::CATEGORIES]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, NominatimGeocodingService $geocoding)
     {
         $data = $request->validate([
             'title'       => ['required', 'string', 'max:100'],
@@ -61,11 +62,12 @@ class WasteReportController extends Controller
             'photo_path'  => $path,
             'latitude'    => $data['latitude'],
             'longitude'   => $data['longitude'],
+            'location_name' => $geocoding->reverseGeocode($data['latitude'], $data['longitude']),
             'status'      => 'pending',
         ]);
 
         return redirect()
-            ->route('user-report')
-            ->with('success', 'Report ' . $report->reference . ' was sent. The barangay team will review it soon.');
+            ->route('user-my-reports')
+            ->with('success', 'Report ' . $report->reference . ' was submitted successfully.');
     }
 }

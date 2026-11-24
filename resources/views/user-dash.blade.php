@@ -1,3 +1,14 @@
+@php
+    $reportStats = array_merge([
+        'total' => 0,
+        'pending' => 0,
+        'resolved' => 0,
+    ], is_array($reportStats ?? null) ? $reportStats : []);
+
+    $recentReports = $recentReports ?? collect();
+    $upcomingDrives = $upcomingDrives ?? collect();
+@endphp
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -165,11 +176,13 @@
                             @endphp
                             <div class="list-item">
                                 <div class="item-main">
-                                    <img src="{{ $report->photo_url }}" alt="{{ $report->title }}" class="report-thumb"
+                                    <img src="{{ $report->photo_url }}" alt="{{ $report->title }}"
+                                        class="report-thumb"
                                         onerror="this.src='https://placehold.co/100x100/1e3a17/fff9a2?text=Issue'">
                                     <div class="item-details">
                                         <div class="item-title">{{ $report->title }}</div>
-                                        <div class="item-subtext">{{ $report->zone ?: 'Zone not specified' }} &bull; {{ $report->created_at->format('M d, Y') }}</div>
+                                        <div class="item-subtext">{{ $report->zone ?: 'Zone not specified' }} &bull;
+                                            {{ $report->created_at->format('M d, Y') }}</div>
                                     </div>
                                 </div>
                                 <span class="badge {{ $statusClass }}">{{ $statusLabel }}</span>
@@ -255,7 +268,8 @@
                             <div class="list-item">
                                 <div class="item-details">
                                     <div class="item-title">No upcoming cleanup drives</div>
-                                    <div class="item-subtext">Check back later for newly scheduled community activities.</div>
+                                    <div class="item-subtext">Check back later for newly scheduled community
+                                        activities.</div>
                                 </div>
                             </div>
                         @endforelse

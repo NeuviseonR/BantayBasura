@@ -17,6 +17,7 @@ class WasteReport extends Model
         'photo_path',
         'latitude',
         'longitude',
+        'location_name',
         'status',
     ];
 

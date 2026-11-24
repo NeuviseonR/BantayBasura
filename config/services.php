@@ -16,6 +16,11 @@ return [
 
     'google_maps' => ['key' => env('GOOGLE_MAPS_API_KEY', 'AIzaSyA0PGv7CApwQ0mU-rOactvS098TEZxCLpg')],
 
+    'nominatim' => [
+        'user_agent' => env('NOMINATIM_USER_AGENT', 'BantayBasura/1.0 (' . env('APP_URL', 'http://localhost') . ')'),
+        'email' => env('NOMINATIM_EMAIL'),
+    ],
+
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
     ],

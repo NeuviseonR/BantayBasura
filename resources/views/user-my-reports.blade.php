@@ -1,224 +1,116 @@
-@php
-    // Placeholder data for the view-only stage.
-    // Later, pass $reports from your controller (only the logged-in resident's reports) and delete this block.
-    $reports = $reports ?? [
-        [
-            'id' => 'BB-0003',
-            'title' => 'Plastic waste on the sidewalk',
-            'category' => 'Plastic waste',
-            'date' => 'Apr 27, 2025',
-            'time' => '8:14 AM',
-            'location' => 'Zone 2',
-            'lat' => '10.315699',
-            'lng' => '123.885437',
-            'status' => 'pending',
-            'photo' => 'https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?auto=format&fit=crop&q=80&w=600',
-            'description' =>
-                'A large pile of plastic bottles and wrappers has been left along the sidewalk near the corner store. It is spilling onto the walkway and people have to step into the road to get around it.',
-            'note' => 'Your report is waiting for verification by the barangay team.',
-        ],
-        [
-            'id' => 'BB-0002',
-            'title' => 'Broken trash bin',
-            'category' => 'Broken trash bin',
-            'date' => 'Apr 22, 2025',
-            'time' => '4:40 PM',
-            'location' => 'Zone 1',
-            'lat' => '10.317120',
-            'lng' => '123.890210',
-            'status' => 'resolved',
-            'photo' => 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&q=80&w=600',
-            'description' =>
-                'The public bin near the basketball court has a cracked side and no lid. Trash is falling out whenever it is windy.',
-            'note' => 'Resolved on Apr 24, 2025. The bin was replaced.',
-        ],
-        [
-            'id' => 'BB-0001',
-            'title' => 'Illegal dumping',
-            'category' => 'Illegal dumping',
-            'date' => 'Apr 15, 2025',
-            'time' => '6:05 AM',
-            'location' => 'Zone 3',
-            'lat' => '10.312884',
-            'lng' => '123.881960',
-            'status' => 'resolved',
-            'photo' => 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&q=80&w=600',
-            'description' =>
-                'Bags of household garbage and old furniture were dumped beside the drainage canal overnight.',
-            'note' => 'Resolved on Apr 18, 2025. The area was cleared.',
-        ],
-    ];
-@endphp
-@php
-    $reportCollection = collect($reports);
-    $totalReports = $reportCollection->count();
-    $pendingReports = $reportCollection
-        ->filter(fn($report) => strtolower($report['status'] ?? '') === 'pending')
-        ->count();
-    $resolvedReports = $reportCollection
-        ->filter(fn($report) => strtolower($report['status'] ?? '') === 'resolved')
-        ->count();
-@endphp
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Bantay Basura - My Reports</title>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     @vite(['resources/css/user-dash.css', 'resources/css/user-my-reports.css', 'resources/css/custom.css'])
 </head>
-
 <body>
     @include('partials.sidebar')
-
     <div class="main-wrapper">
-
-        {{-- Top Navigation Header --}}
         <header class="top-header">
             <div class="user-greeting">
-                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=120"
-                    alt="Maria Lopez" class="avatar-img"
-                    onerror="this.src='https://placehold.co/80x80/1e3a17/fff9a2?text=ML'">
-                <div class="greeting-text">
-                    <h2>Hello, {{ auth()->user()->name }}!</h2>
-                </div>
+                <div class="avatar-initials">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
+                <div class="greeting-text"><h2>Hello, {{ auth()->user()->name }}!</h2></div>
             </div>
-
             <div class="top-actions">
-                <button class="notification-btn" aria-label="Notifications">
-                    <i class="fa-regular fa-bell"></i>
-                    <span class="notification-dot"></span>
-                </button>
-
                 <div class="profile-pill">
-                    <div class="avatar-initials">ML</div>
-                    <div class="profile-info">
-                        <div class="name">{{ auth()->user()->name }}</div>
-                        <div class="role">{{ auth()->user()->role }}</div>
-                    </div>
+                    <div class="avatar-initials">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
+                    <div class="profile-info"><div class="name">{{ auth()->user()->name }}</div><div class="role">{{ ucfirst(auth()->user()->role) }}</div></div>
                     <i class="fa-solid fa-chevron-down dropdown-icon"></i>
                 </div>
             </div>
         </header>
 
-        <main class="dashboard-content">
-
+        <main class="dashboard-content reports-page">
             <div class="reports-page-heading">
                 <div class="page-title">
                     <h1>My Reports</h1>
-                    <p>Keep track of the waste concerns you've submitted and check their latest status.</p>
+                    <p>Review the waste concerns you have submitted and follow their progress.</p>
                 </div>
-                <a href="{{ route('user-report') }}" class="reports-create-btn"><i class="fa-solid fa-plus"></i> New
-                    report</a>
+                <a href="{{ route('user-report') }}" class="reports-create-btn"><i class="fa-solid fa-plus"></i> New report</a>
             </div>
+
+            @if (session('success'))
+                <div class="reports-success" role="status"><i class="fa-regular fa-circle-check"></i>{{ session('success') }}</div>
+            @endif
 
             <section class="report-summary" aria-label="Report summary">
                 <article class="summary-card summary-total">
                     <span class="summary-icon"><i class="fa-solid fa-folder-open"></i></span>
-                    <div><span class="summary-label">Total reports</span><strong>{{ $totalReports }}</strong><small>All
-                            submitted concerns</small></div>
+                    <div><span class="summary-label">Total reports</span><strong>{{ $totalReports }}</strong></div>
                 </article>
                 <article class="summary-card summary-pending">
                     <span class="summary-icon"><i class="fa-regular fa-clock"></i></span>
-                    <div><span class="summary-label">Pending</span><strong>{{ $pendingReports }}</strong><small>Awaiting
-                            action</small></div>
+                    <div><span class="summary-label">Pending</span><strong>{{ $pendingReports }}</strong></div>
                 </article>
                 <article class="summary-card summary-resolved">
                     <span class="summary-icon"><i class="fa-regular fa-circle-check"></i></span>
-                    <div><span
-                            class="summary-label">Resolved</span><strong>{{ $resolvedReports }}</strong><small>Completed
-                            concerns</small></div>
+                    <div><span class="summary-label">Resolved</span><strong>{{ $resolvedReports }}</strong></div>
                 </article>
             </section>
 
             <section class="reports-section">
                 <div class="reports-section-heading">
-                    <div>
-                        <h2>Submitted reports</h2>
-                        <p>Select a report to view its details and location.</p>
-                    </div>
-                    <span class="reports-count">{{ $totalReports }}
-                        {{ $totalReports === 1 ? 'report' : 'reports' }}</span>
+                    <div><h2>Submitted reports</h2><p>Select a report to view its details, evidence, and recorded location. Place names are provided by <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a>.</p></div>
+                    <span class="reports-count">{{ $totalReports }} {{ $totalReports === 1 ? 'report' : 'reports' }}</span>
                 </div>
-                <section class="reports-card">
-
-                    {{-- Column labels (desktop only) --}}
-                    <div class="reports-head" aria-hidden="true">
-                        <span>Report</span>
-                        <span>Date</span>
-                        <span>Location</span>
-                        <span>Status</span>
-                        <span></span>
-                    </div>
-
-                    @forelse ($reports as $i => $r)
+                <div class="reports-card">
+                    <div class="reports-head" aria-hidden="true"><span>Report</span><span>Date submitted</span><span>Location</span><span>Status</span><span></span></div>
+                    @forelse ($reports as $report)
+                        @php
+                            $status = strtolower($report->status ?? 'pending');
+                            $statusLabels = ['pending' => 'Pending', 'verified' => 'Under review', 'resolved' => 'Resolved', 'rejected' => 'Rejected'];
+                            $statusLabel = $statusLabels[$status] ?? ucfirst(str_replace('_', ' ', $status));
+                            $statusNotes = [
+                                'pending' => 'Your report has been submitted and is waiting for the barangay team to review it.',
+                                'verified' => 'Your report has been verified and is being reviewed or acted on by the barangay team.',
+                                'resolved' => 'This report has been marked as resolved by the barangay team.',
+                                'rejected' => 'This report was not accepted. Please contact your barangay team if you need clarification.',
+                            ];
+                            $categoryLabels = \App\Http\Controllers\WasteReportController::CATEGORIES;
+                            $categoryLabel = $categoryLabels[$report->category] ?? ucfirst(str_replace('_', ' ', $report->category));
+                            $locationLabel = $report->location_name ?: 'GPS location saved (place name unavailable)';
+                            $latitude = $report->latitude;
+                            $longitude = $report->longitude;
+                        @endphp
                         <article class="report-row">
-                            <button type="button" class="report-toggle" aria-expanded="false"
-                                aria-controls="report-panel-{{ $i }}" id="report-btn-{{ $i }}">
-                                <span class="cell cell-title"><span class="report-type-icon"><i
-                                            class="fa-solid fa-recycle"></i></span><span
-                                        class="report-title-text">{{ $r['title'] }}<small>{{ $r['id'] }} ·
-                                            {{ $r['category'] }}</small></span></span>
-                                <span class="cell cell-date"><i
-                                        class="fa-regular fa-calendar"></i>{{ $r['date'] }}</span>
-                                <span class="cell cell-location"><i
-                                        class="fa-solid fa-location-dot"></i>{{ $r['location'] }}</span>
-                                <span class="cell cell-status">
-                                    <span
-                                        class="badge {{ $r['status'] }}">{{ $r['status'] === 'resolved' ? 'Resolved' : 'Pending' }}</span>
+                            <button type="button" class="report-toggle" aria-expanded="false" aria-controls="report-panel-{{ $report->id }}" id="report-btn-{{ $report->id }}">
+                                <span class="cell cell-title">
+                                    <span class="report-type-icon"><i class="fa-solid fa-recycle"></i></span>
+                                    <span class="report-title-text">{{ $report->title }}<small>{{ $report->reference }} · {{ $categoryLabel }}</small></span>
                                 </span>
+                                <span class="cell cell-date"><i class="fa-regular fa-calendar"></i>{{ $report->created_at?->format('M d, Y · g:i A') }}</span>
+                                <span class="cell cell-location" title="{{ $locationLabel }}"><i class="fa-solid fa-location-dot"></i>{{ $locationLabel }}</span>
+                                <span class="cell cell-status"><span class="badge {{ $status }}">{{ $statusLabel }}</span></span>
                                 <span class="cell cell-chevron"><i class="fa-solid fa-chevron-down"></i></span>
                             </button>
-
-                            <div class="report-panel" id="report-panel-{{ $i }}" role="region"
-                                aria-labelledby="report-btn-{{ $i }}">
+                            <div class="report-panel" id="report-panel-{{ $report->id }}" role="region" aria-labelledby="report-btn-{{ $report->id }}">
                                 <div class="report-panel-inner">
                                     <div class="report-detail">
-                                        <img src="{{ $r['photo'] }}" alt="Photo for {{ $r['title'] }}"
-                                            class="detail-photo"
-                                            onerror="this.src='https://placehold.co/600x400/1e3a17/fff9a2?text=Photo'">
-
+                                        @if ($report->photo_path)
+                                            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($report->photo_path) }}" alt="Photo evidence for {{ $report->title }}" class="detail-photo" loading="lazy">
+                                        @else
+                                            <div class="detail-photo detail-photo-empty"><i class="fa-regular fa-image"></i><span>No photo attached</span></div>
+                                        @endif
                                         <div class="detail-body">
                                             <dl class="detail-grid">
-                                                <div>
-                                                    <dt>Report ID</dt>
-                                                    <dd>{{ $r['id'] }}</dd>
-                                                </div>
-                                                <div>
-                                                    <dt>Category</dt>
-                                                    <dd>{{ $r['category'] }}</dd>
-                                                </div>
-                                                <div>
-                                                    <dt>Submitted</dt>
-                                                    <dd>{{ $r['date'] }}, {{ $r['time'] }}</dd>
-                                                </div>
-                                                <div>
-                                                    <dt>GPS location</dt>
-                                                    <dd>
-                                                        {{ $r['lat'] }}, {{ $r['lng'] }}
-                                                        <a href="https://www.google.com/maps?q={{ $r['lat'] }},{{ $r['lng'] }}"
-                                                            target="_blank" rel="noopener" class="map-link">View on
-                                                            map</a>
-                                                    </dd>
-                                                </div>
+                                                <div><dt>Report ID</dt><dd>{{ $report->reference }}</dd></div>
+                                                <div><dt>Category</dt><dd>{{ $categoryLabel }}</dd></div>
+                                                <div><dt>Submitted</dt><dd>{{ $report->created_at?->format('F d, Y · g:i A') }}</dd></div>
+                                                <div><dt>Location</dt><dd>{{ $locationLabel }}</dd></div>
+                                                <div><dt>GPS coordinates</dt><dd>{{ number_format((float) $latitude, 7) }}, {{ number_format((float) $longitude, 7) }}<a href="https://www.google.com/maps?q={{ $latitude }},{{ $longitude }}" target="_blank" rel="noopener noreferrer" class="map-link">Open in Google Maps <i class="fa-solid fa-arrow-up-right-from-square"></i></a></dd></div>
                                             </dl>
-
-                                            <div class="detail-description">
-                                                <h4>Description</h4>
-                                                <p>{{ $r['description'] }}</p>
-                                            </div>
-
-                                            <div class="detail-note {{ $r['status'] }}">
-                                                <i
-                                                    class="{{ $r['status'] === 'resolved' ? 'fa-regular fa-circle-check' : 'fa-regular fa-hourglass-half' }}"></i>
-                                                <span>{{ $r['note'] }}</span>
+                                            <div class="detail-description"><h4>Description</h4><p>{{ $report->description }}</p></div>
+                                            <div class="detail-note {{ $status }}">
+                                                <i class="{{ $status === 'resolved' ? 'fa-regular fa-circle-check' : ($status === 'rejected' ? 'fa-solid fa-circle-exclamation' : 'fa-regular fa-hourglass-half') }}"></i>
+                                                <span>{{ $statusNotes[$status] ?? 'Your report status will be updated here when the barangay team takes action.' }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -227,42 +119,30 @@
                         </article>
                     @empty
                         <div class="reports-empty">
-                            <i class="fa-regular fa-clipboard"></i>
-                            <h3>No reports yet</h3>
-                            <p>When you report a waste issue, it will show up here.</p>
-                            <a href="{{ route('user-report') }}" class="btn-report"><i class="fa-solid fa-plus"></i>
-                                Report a Waste Issue</a>
+                            <i class="fa-regular fa-clipboard"></i><h3>No reports yet</h3>
+                            <p>Reports you submit will appear here so you can track their status.</p>
+                            <a href="{{ route('user-report') }}" class="btn-report"><i class="fa-solid fa-plus"></i> Submit your first report</a>
                         </div>
                     @endforelse
-
-                </section>
+                </div>
             </section>
-
         </main>
     </div>
-
     <script>
-        // Mobile menu
-        document.getElementById('menuToggle').addEventListener('click', function() {
-            document.getElementById('navList').classList.toggle('active');
-        });
+        const menuToggle = document.getElementById('menuToggle');
+        const navList = document.getElementById('navList');
+        if (menuToggle && navList) menuToggle.addEventListener('click', () => navList.classList.toggle('active'));
 
-        // Report drop-downs (one open at a time)
         const toggles = document.querySelectorAll('.report-toggle');
-
-        function setOpen(btn, open) {
-            btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-            btn.closest('.report-row').classList.toggle('open', open);
+        function setOpen(button, open) {
+            button.setAttribute('aria-expanded', open ? 'true' : 'false');
+            button.closest('.report-row')?.classList.toggle('open', open);
         }
-
-        toggles.forEach((btn) => {
-            btn.addEventListener('click', () => {
-                const willOpen = btn.getAttribute('aria-expanded') !== 'true';
-                toggles.forEach((other) => setOpen(other, false));
-                setOpen(btn, willOpen);
-            });
-        });
+        toggles.forEach(button => button.addEventListener('click', () => {
+            const willOpen = button.getAttribute('aria-expanded') !== 'true';
+            toggles.forEach(other => setOpen(other, false));
+            setOpen(button, willOpen);
+        }));
     </script>
 </body>
-
 </html>

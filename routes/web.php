@@ -4,9 +4,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\WasteReportController;
-use App\Http\Controllers\ResidentDashboardController;
+use App\Http\Controllers\WasteReportHistoryController;
 use App\Http\Controllers\VolunteerController;
 use App\Http\Controllers\CleanupDriveLeaderController;
+use App\Http\Controllers\ResidentDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,7 +46,8 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
-    Route::get('/user-dash', [ResidentDashboardController::class, 'index'])->name('user-dash');
+    Route::get('/user-dash', [ResidentDashboardController::class, 'index'])
+    ->name('user-dash');
 
     // Sending a report
     Route::get('/user-report', [WasteReportController::class, 'create'])->name('user-report');
@@ -53,7 +55,7 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:10,1')
         ->name('user-report.store');
 
-    Route::view('/user-my-reports', 'user-my-reports')->name('user-my-reports');
+    Route::get('/user-my-reports', [WasteReportHistoryController::class, 'index'])->name('user-my-reports');
     Route::view('/user-collection-schedule', 'user-collection-schedule')->name('user-collection-schedule');
     Route::get('/user-cleanup-drives', [VolunteerController::class, 'drives'])->name('user-cleanup-drives');
     Route::get('/volunteer/apply', [VolunteerController::class, 'applyForm'])->name('volunteer.apply');
