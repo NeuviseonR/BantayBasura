@@ -7,7 +7,6 @@ use App\Http\Controllers\WasteReportController;
 use App\Http\Controllers\WasteReportHistoryController;
 use App\Http\Controllers\VolunteerController;
 use App\Http\Controllers\CleanupDriveLeaderController;
-use App\Http\Controllers\ResidentDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,8 +45,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
-    Route::get('/user-dash', [ResidentDashboardController::class, 'index'])
-    ->name('user-dash');
+    Route::view('/user-dash', 'user-dash')->name('user-dash');
 
     // Sending a report
     Route::get('/user-report', [WasteReportController::class, 'create'])->name('user-report');
@@ -96,4 +94,40 @@ Route::middleware('auth')->group(function () {
     Route::view('/purok-overview', 'purok-overview')->name('purok-overview');
     Route::view('/purok-messages', 'purok-messages')->name('purok-messages');
     Route::view('/purok-profile', 'purok-profile')->name('purok-profile');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Staff dashboard prototypes (separate Blade page per navigation tab)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
+    Route::get('/account-manager/{section?}', function (?string $section = 'dashboard') {
+        $pages = [
+            'dashboard' => ['staff.manager.dashboard', 'Manager Dashboard'],
+            'accounts' => ['staff.manager.accounts', 'New Account Verification'],
+            'applications' => ['staff.manager.applications', 'Volunteer & Purok Leader Applications'],
+            'volunteers' => ['staff.manager.volunteers', 'Volunteer Records & Points'],
+            'points' => ['staff.manager.points', 'Volunteer Point Disputes & Appeals'],
+            'tickets' => ['staff.manager.tickets', 'Resident & Volunteer Support Tickets'],
+            'activity' => ['staff.manager.activity', 'Suspicious Account Monitoring'],
+            'audit' => ['staff.manager.audit', 'Manager Action History'],
+        ];
+        abort_unless(isset($pages[$section]), 404);
+        return view($pages[$section][0], ['actor' => 'manager', 'section' => $section, 'pageTitle' => $pages[$section][1]]);
+    })->where('section', '[a-z-]+')->name('account-manager.preview');
+
+    Route::get('/administrator/{section?}', function (?string $section = 'dashboard') {
+        $pages = [
+            'dashboard' => ['staff.administrator.dashboard', 'Administrator Dashboard'],
+            'managers' => ['staff.administrator.managers', 'Manager Account & Permission Management'],
+            'users' => ['staff.administrator.users', 'All Registered Accounts'],
+            'enforcement' => ['staff.administrator.enforcement', 'Account Suspensions & Bans'],
+            'appeals' => ['staff.administrator.appeals', 'Account Ban Appeals'],
+            'audit' => ['staff.administrator.audit', 'System-Wide Activity Logs'],
+            'settings' => ['staff.administrator.settings', 'System Configuration & Security'],
+        ];
+        abort_unless(isset($pages[$section]), 404);
+        return view($pages[$section][0], ['actor' => 'administrator', 'section' => $section, 'pageTitle' => $pages[$section][1]]);
+    })->where('section', '[a-z-]+')->name('administrator.preview');
 });

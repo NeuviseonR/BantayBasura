@@ -20,6 +20,8 @@ export default defineConfig({
                 'resources/css/user-profile.css',
                 'resources/css/purok-pages.css',
                 'resources/css/purok-activities-db.css',
+                'resources/css/staff-dashboards.css',
+                'resources/js/staff-dashboards.js',
             ],
             refresh: true,
             fonts: [

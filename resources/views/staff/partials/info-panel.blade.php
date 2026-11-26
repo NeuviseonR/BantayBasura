@@ -1,0 +1,1 @@
+<section class="staff-panel staff-info-panel"><div class="staff-info-icon"><i class="fa-solid {{ $infoIcon ?? 'fa-circle-info' }}"></i></div><div><h3>{{ $infoTitle }}</h3><p>{{ $infoText }}</p></div></section>
