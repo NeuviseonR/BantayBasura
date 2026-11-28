@@ -38,8 +38,8 @@
                             href="{{ route('volunteer.log') }}"><i class="fa-solid fa-award"></i> Volunteering Log</a>
                     </li>
                 @endif
-                <li class="nav-item {{ request()->routeIs('user-messages') ? 'active' : '' }}">
-                    <a href="{{ route('user-messages') }}"><i class="fa-regular fa-comment"></i> Messages</a>
+                <li class="nav-item {{ request()->routeIs('user-tickets.*', 'user-messages') ? 'active' : '' }}">
+                    <a href="{{ route('user-tickets.index') }}"><i class="fa-solid fa-ticket"></i> Support Tickets</a>
                 </li>
                 <li class="nav-item {{ request()->routeIs('user-profile') ? 'active' : '' }}">
                     <a href="{{ route('user-profile') }}"><i class="fa-regular fa-user"></i> Profile</a>

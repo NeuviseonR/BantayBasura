@@ -44,6 +44,16 @@ class User extends Authenticatable
         return $this->hasMany(VolunteerPointTransaction::class, 'volunteer_id');
     }
 
+    public function supportTickets(): HasMany
+    {
+        return $this->hasMany(SupportTicket::class);
+    }
+
+    public function supportTicketMessages(): HasMany
+    {
+        return $this->hasMany(SupportTicketMessage::class, 'sender_id');
+    }
+
     public function isResident(): bool
     {
         return $this->role === 'resident';

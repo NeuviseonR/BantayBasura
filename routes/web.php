@@ -7,6 +7,7 @@ use App\Http\Controllers\WasteReportController;
 use App\Http\Controllers\WasteReportHistoryController;
 use App\Http\Controllers\VolunteerController;
 use App\Http\Controllers\CleanupDriveLeaderController;
+use App\Http\Controllers\ResidentTicketController;
 
 /*
 |--------------------------------------------------------------------------
@@ -67,7 +68,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/volunteer/cleanup-drives/{drive}/gallery', [VolunteerController::class, 'gallery'])->name('volunteer.gallery');
     Route::get('/volunteer/log', [VolunteerController::class, 'log'])->name('volunteer.log');
 
-    Route::view('/user-messages', 'user-messages')->name('user-messages');
+    // Resident and volunteer support tickets (replaces the old open-chat page).
+    Route::get('/user-tickets', [ResidentTicketController::class, 'index'])->name('user-tickets.index');
+    Route::get('/user-tickets/create', [ResidentTicketController::class, 'create'])->name('user-tickets.create');
+    Route::post('/user-tickets', [ResidentTicketController::class, 'store'])->middleware('throttle:5,1')->name('user-tickets.store');
+    Route::get('/user-tickets/{ticket}', [ResidentTicketController::class, 'show'])->whereNumber('ticket')->name('user-tickets.show');
+    Route::post('/user-tickets/{ticket}/replies', [ResidentTicketController::class, 'reply'])->middleware('throttle:10,1')->whereNumber('ticket')->name('user-tickets.reply');
+    Route::get('/user-tickets/{ticket}/attachment', [ResidentTicketController::class, 'attachment'])->whereNumber('ticket')->name('user-tickets.attachment');
+
+    // Preserve old bookmarks and references while replacing resident chat with tickets.
+    Route::redirect('/user-messages', '/user-tickets')->name('user-messages');
     Route::view('/user-profile', 'user-profile')->name('user-profile');
 });
 
@@ -98,36 +108,27 @@ Route::middleware('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Staff dashboard prototypes (separate Blade page per navigation tab)
+| Staff dashboard prototypes (static sample data; no database integration)
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
     Route::get('/account-manager/{section?}', function (?string $section = 'dashboard') {
-        $pages = [
-            'dashboard' => ['staff.manager.dashboard', 'Manager Dashboard'],
-            'accounts' => ['staff.manager.accounts', 'New Account Verification'],
-            'applications' => ['staff.manager.applications', 'Volunteer & Purok Leader Applications'],
-            'volunteers' => ['staff.manager.volunteers', 'Volunteer Records & Points'],
-            'points' => ['staff.manager.points', 'Volunteer Point Disputes & Appeals'],
-            'tickets' => ['staff.manager.tickets', 'Resident & Volunteer Support Tickets'],
-            'activity' => ['staff.manager.activity', 'Suspicious Account Monitoring'],
-            'audit' => ['staff.manager.audit', 'Manager Action History'],
+        $titles = [
+            'dashboard' => 'Overview', 'accounts' => 'Account Review', 'applications' => 'Role Applications',
+            'volunteers' => 'Volunteer Directory', 'points' => 'Points & Appeals', 'tickets' => 'Ticket Center',
+            'activity' => 'Suspicious Activity', 'audit' => 'Audit Log',
         ];
-        abort_unless(isset($pages[$section]), 404);
-        return view($pages[$section][0], ['actor' => 'manager', 'section' => $section, 'pageTitle' => $pages[$section][1]]);
+        abort_unless(array_key_exists($section, $titles), 404);
+        return view('staff.console', ['actor' => 'manager', 'section' => $section, 'pageTitle' => $titles[$section]]);
     })->where('section', '[a-z-]+')->name('account-manager.preview');
 
     Route::get('/administrator/{section?}', function (?string $section = 'dashboard') {
-        $pages = [
-            'dashboard' => ['staff.administrator.dashboard', 'Administrator Dashboard'],
-            'managers' => ['staff.administrator.managers', 'Manager Account & Permission Management'],
-            'users' => ['staff.administrator.users', 'All Registered Accounts'],
-            'enforcement' => ['staff.administrator.enforcement', 'Account Suspensions & Bans'],
-            'appeals' => ['staff.administrator.appeals', 'Account Ban Appeals'],
-            'audit' => ['staff.administrator.audit', 'System-Wide Activity Logs'],
-            'settings' => ['staff.administrator.settings', 'System Configuration & Security'],
+        $titles = [
+            'dashboard' => 'Overview', 'managers' => 'Manager Accounts', 'users' => 'User Directory',
+            'enforcement' => 'Enforcement', 'appeals' => 'Ban Appeals', 'audit' => 'System Audit',
+            'settings' => 'Platform Settings',
         ];
-        abort_unless(isset($pages[$section]), 404);
-        return view($pages[$section][0], ['actor' => 'administrator', 'section' => $section, 'pageTitle' => $pages[$section][1]]);
+        abort_unless(array_key_exists($section, $titles), 404);
+        return view('staff.console', ['actor' => 'administrator', 'section' => $section, 'pageTitle' => $titles[$section]]);
     })->where('section', '[a-z-]+')->name('administrator.preview');
 });
