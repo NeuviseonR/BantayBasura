@@ -15,7 +15,7 @@ CORE RESET & VARIABLES
 --dark-text: rgb(17, 46, 17);
 
 /* Helper Derived & Layout Colors */
---bg-main: rgba(255, 249, 162, 0.2);
+--bg-main: rgba(213, 233, 142, 0.575);
 --card-bg: #ffffff;
 --text-muted: rgba(17, 46, 17, 0.7);
 --border-color: rgba(30, 58, 23, 0.15);
@@ -129,7 +129,7 @@ text-align: center;
 }
 
 .sidebar-footer {
-border-top: 1px solid rgba(255, 249, 162, 0.2);
+border-top: 1px solid rgba(213, 233, 142, 0.575);
 padding-top: 16px;
 margin-top: auto;
 }

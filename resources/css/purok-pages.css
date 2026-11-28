@@ -262,7 +262,7 @@ body.no-scroll { overflow: hidden; }
   color: var(--light-contrast);
 }
 
-.chip-stat.is-on i { background-color: rgba(255, 249, 162, 0.2); color: var(--light-contrast); }
+.chip-stat.is-on i { background-color: rgba(213, 233, 142, 0.575); color: var(--light-contrast); }
 .chip-stat.is-on .cs-label { color: var(--light-contrast); opacity: 0.85; }
 
 /* ---------- Tables (extends .report-table) ---------- */

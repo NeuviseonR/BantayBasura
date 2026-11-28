@@ -225,7 +225,7 @@ select:focus-visible {
 }
 
 .report-table tbody tr:last-child td { border-bottom: none; }
-.report-table tbody tr:hover { background-color: rgba(255, 249, 162, 0.2); }
+.report-table tbody tr:hover { background-color: rgba(213, 233, 142, 0.575); }
 
 .rt-report {
   display: flex;
