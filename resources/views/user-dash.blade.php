@@ -35,25 +35,23 @@
         {{-- Top Navigation Header --}}
         <header class="top-header">
             <div class="user-greeting">
-                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=120"
-                    alt="Maria Lopez" class="avatar-img"
-                    onerror="this.src='https://placehold.co/80x80/1e3a17/fff9a2?text=ML'">
+                @if (auth()->user()->profile_photo_path)
+                    <img src="{{ Storage::disk('public')->url(auth()->user()->profile_photo_path) }}" alt="{{ auth()->user()->name }}" class="avatar-img">
+                @else
+                    <div class="avatar-initials">{{ auth()->user()->initials }}</div>
+                @endif
                 <div class="greeting-text">
                     <h2>Hello, {{ auth()->user()->name }}!</h2>
                 </div>
             </div>
 
             <div class="top-actions">
-                <button class="notification-btn" aria-label="Notifications">
-                    <i class="fa-regular fa-bell"></i>
-                    <span class="notification-dot"></span>
-                </button>
 
                 <div class="profile-pill">
-                    <div class="avatar-initials">ML</div>
+                    <div class="avatar-initials">{{ auth()->user()->initials }}</div>
                     <div class="profile-info">
                         <div class="name">{{ auth()->user()->name }}</div>
-                        <div class="role">{{ auth()->user()->role }}</div>
+                        <div class="role">{{ ucfirst(auth()->user()->role) }}</div>
                     </div>
                     <i class="fa-solid fa-chevron-down dropdown-icon"></i>
                 </div>
@@ -169,10 +167,12 @@
                             @php
                                 $statusClass = match (strtolower($report->status)) {
                                     'pending' => 'pending',
+                                    'verified' => 'pending',
                                     'resolved' => 'resolved',
+                                    'rejected' => 'rejected',
                                     default => 'pending',
                                 };
-                                $statusLabel = ucwords(str_replace('_', ' ', $report->status));
+                                $statusLabel = match ($report->status) { 'verified' => 'Under review', 'rejected' => 'Rejected', default => ucwords(str_replace('_', ' ', $report->status)) };
                             @endphp
                             <div class="list-item">
                                 <div class="item-main">
@@ -181,7 +181,7 @@
                                         onerror="this.src='https://placehold.co/100x100/1e3a17/fff9a2?text=Issue'">
                                     <div class="item-details">
                                         <div class="item-title">{{ $report->title }}</div>
-                                        <div class="item-subtext">{{ $report->zone ?: 'Zone not specified' }} &bull;
+                                        <div class="item-subtext">{{ $report->location_name ?: 'GPS location saved' }} &bull;
                                             {{ $report->created_at->format('M d, Y') }}</div>
                                     </div>
                                 </div>
@@ -202,7 +202,7 @@
                 <div class="column-card">
                     <div class="column-header">
                         <h3>Collection Schedule</h3>
-                        <a href="{{ route('user-cleanup-drives') }}" class="view-all">View All</a>
+                        <a href="{{ route('user-collection-schedule') }}" class="view-all">View All</a>
                     </div>
                     <div class="list-items">
                         <div class="list-item">
@@ -247,7 +247,7 @@
                 <div class="column-card">
                     <div class="column-header">
                         <h3>Upcoming Cleanup Drives</h3>
-                        <a href="{{ route('user-collection-schedule') }}" class="view-all">View All</a>
+                        <a href="{{ route('user-cleanup-drives') }}" class="view-all">View All</a>
                     </div>
                     <div class="list-items">
                         @forelse ($upcomingDrives as $drive)

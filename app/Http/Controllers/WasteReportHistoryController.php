@@ -10,7 +10,7 @@ class WasteReportHistoryController extends Controller
 
         $counts = $user->wasteReports()
             ->selectRaw('COUNT(*) as total')
-            ->selectRaw("SUM(CASE WHEN LOWER(status) = 'pending' THEN 1 ELSE 0 END) as pending")
+            ->selectRaw("SUM(CASE WHEN LOWER(status) IN ('pending', 'verified') THEN 1 ELSE 0 END) as pending")
             ->selectRaw("SUM(CASE WHEN LOWER(status) = 'resolved' THEN 1 ELSE 0 END) as resolved")
             ->first();
 

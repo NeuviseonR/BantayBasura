@@ -17,25 +17,23 @@
 <body>@include('partials.sidebar')<div class="main-wrapper">
         <header class="top-header">
             <div class="user-greeting">
-                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=120"
-                    alt="Maria Lopez" class="avatar-img"
-                    onerror="this.src='https://placehold.co/80x80/1e3a17/fff9a2?text=ML'">
+                @if (auth()->user()->profile_photo_path)
+                    <img src="{{ Storage::disk('public')->url(auth()->user()->profile_photo_path) }}" alt="{{ auth()->user()->name }}" class="avatar-img">
+                @else
+                    <div class="avatar-initials">{{ auth()->user()->initials }}</div>
+                @endif
                 <div class="greeting-text">
                     <h2>Hello, {{ auth()->user()->name }}!</h2>
                 </div>
             </div>
 
             <div class="top-actions">
-                <button class="notification-btn" aria-label="Notifications">
-                    <i class="fa-regular fa-bell"></i>
-                    <span class="notification-dot"></span>
-                </button>
 
                 <div class="profile-pill">
-                    <div class="avatar-initials">ML</div>
+                    <div class="avatar-initials">{{ auth()->user()->initials }}</div>
                     <div class="profile-info">
                         <div class="name">{{ auth()->user()->name }}</div>
-                        <div class="role">{{ auth()->user()->role }}</div>
+                        <div class="role">{{ ucfirst(auth()->user()->role) }}</div>
                     </div>
                     <i class="fa-solid fa-chevron-down dropdown-icon"></i>
                 </div>
@@ -67,7 +65,7 @@
                 <div class="activities-list" id="activitiesList">
                     @forelse($regs as $reg)
                         @php($drive = $reg->drive)
-                        <article class="activity-card" data-activity data-status="{{ $reg->attendance_status }}"
+                        <article class="activity-card" data-activity data-status="{{ $reg->display_status }}"
                             data-start="{{ $drive->start_at->timestamp }}">
                             <div class="activity-date">
                                 <span>{{ $drive->start_at->format('M') }}</span><strong>{{ $drive->start_at->format('d') }}</strong>
@@ -78,10 +76,12 @@
                                     {{ $drive->start_at->format('M d, Y · g:i A') }} –
                                     {{ $drive->end_at->format('g:i A') }} <i class="fa-solid fa-location-dot"></i>
                                     {{ $drive->location }}</p><span
-                                    class="status {{ $reg->attendance_status }}">{{ str_replace('_', ' ', ucfirst($reg->attendance_status)) }}</span>
+                                    class="status {{ $reg->display_status }}">{{ str_replace('_', ' ', ucfirst($reg->display_status)) }}</span>
                                 @if (
                                     !$reg->verified_at &&
                                         !$reg->evidence_submitted_at &&
+                                        $drive->status !== 'cancelled' &&
+                                        !in_array($reg->attendance_status, ['cancelled', 'no_show'], true) &&
                                         now()->between($drive->start_at, $drive->end_at->copy()->addDays(3)))
                                     <div class="proof-actions">
                                         <form method="POST" action="{{ route('cleanup.evidence', $reg) }}"
@@ -102,7 +102,7 @@
                                 @elseif($reg->evidence_submitted_at && !$reg->verified_at)
                                     <p class="muted">Photo evidence submitted; awaiting organizer review.</p>
                                 @endif
-                                @if ($reg->attendance_status === 'registered' && $drive->start_at->isFuture())
+                                @if ($reg->attendance_status === 'registered' && $drive->status !== 'cancelled' && $drive->start_at->isFuture())
                                     <form method="POST" action="{{ route('cleanup.cancel', $reg) }}">@csrf<button
                                             class="btn secondary small" type="submit">Cancel registration</button>
                                     </form>
@@ -140,10 +140,7 @@
                 btn.classList.add('active');
                 cards.forEach(c => {
                     const s = c.dataset.status;
-                    const ok = btn.dataset.filter === 'all' || (btn.dataset.filter === 'upcoming' && s ===
-                        'registered') || (btn.dataset.filter === 'ongoing' && s === 'ongoing') || (btn
-                        .dataset.filter === 'verify' && ['awaiting_verification', 'registered']
-                        .includes(s)) || (btn.dataset.filter === 'completed' && ['verified', 'no_show']
+                    const ok = btn.dataset.filter === 'all' || (btn.dataset.filter === 'upcoming' && s === 'registered') || (btn.dataset.filter === 'ongoing' && s === 'ongoing') || (btn.dataset.filter === 'verify' && s === 'awaiting_verification') || (btn.dataset.filter === 'completed' && ['verified', 'no_show']
                         .includes(s));
                     c.hidden = !ok;
                 });

@@ -45,18 +45,18 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 | Resident pages (must be logged in)
 |--------------------------------------------------------------------------
 */
-Route::middleware('auth')->group(function () {
-    Route::view('/user-dash', 'user-dash')->name('user-dash');
+Route::middleware(['auth', 'resident.volunteer'])->group(function () {
+    Route::get('/user-dash', [\App\Http\Controllers\ResidentDashboardController::class, 'index'])->name('user-dash');
 
-    // Sending a report
+    // Resident and volunteer reporting pages.
     Route::get('/user-report', [WasteReportController::class, 'create'])->name('user-report');
     Route::post('/user-report', [WasteReportController::class, 'store'])
         ->middleware('throttle:10,1')
         ->name('user-report.store');
-
     Route::get('/user-my-reports', [WasteReportHistoryController::class, 'index'])->name('user-my-reports');
     Route::view('/user-collection-schedule', 'user-collection-schedule')->name('user-collection-schedule');
     Route::get('/user-cleanup-drives', [VolunteerController::class, 'drives'])->name('user-cleanup-drives');
+
     Route::get('/volunteer/apply', [VolunteerController::class, 'applyForm'])->name('volunteer.apply');
     Route::post('/volunteer/apply', [VolunteerController::class, 'apply'])->name('volunteer.apply.submit');
     Route::post('/cleanup-drives/{drive}/join', [VolunteerController::class, 'join'])->name('cleanup.join');
@@ -68,17 +68,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/volunteer/cleanup-drives/{drive}/gallery', [VolunteerController::class, 'gallery'])->name('volunteer.gallery');
     Route::get('/volunteer/log', [VolunteerController::class, 'log'])->name('volunteer.log');
 
-    // Resident and volunteer support tickets (replaces the old open-chat page).
+    // Resident and volunteer support tickets.
     Route::get('/user-tickets', [ResidentTicketController::class, 'index'])->name('user-tickets.index');
     Route::get('/user-tickets/create', [ResidentTicketController::class, 'create'])->name('user-tickets.create');
     Route::post('/user-tickets', [ResidentTicketController::class, 'store'])->middleware('throttle:5,1')->name('user-tickets.store');
     Route::get('/user-tickets/{ticket}', [ResidentTicketController::class, 'show'])->whereNumber('ticket')->name('user-tickets.show');
     Route::post('/user-tickets/{ticket}/replies', [ResidentTicketController::class, 'reply'])->middleware('throttle:10,1')->whereNumber('ticket')->name('user-tickets.reply');
     Route::get('/user-tickets/{ticket}/attachment', [ResidentTicketController::class, 'attachment'])->whereNumber('ticket')->name('user-tickets.attachment');
-
-    // Preserve old bookmarks and references while replacing resident chat with tickets.
     Route::redirect('/user-messages', '/user-tickets')->name('user-messages');
-    Route::view('/user-profile', 'user-profile')->name('user-profile');
+
+    Route::get('/user-profile', [\App\Http\Controllers\UserProfileController::class, 'show'])->name('user-profile');
+    Route::put('/user-profile', [\App\Http\Controllers\UserProfileController::class, 'update'])->name('user-profile.update');
+    Route::put('/user-profile/password', [\App\Http\Controllers\UserProfileController::class, 'updatePassword'])->name('user-profile.password');
 });
 
 

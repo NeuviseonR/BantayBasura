@@ -3,7 +3,6 @@ namespace App\Http\Controllers;
 use App\Models\{CleanupDrive, CleanupDriveRegistration, CleanupDriveEvidence, VolunteerApplication, VolunteerPointTransaction, VolunteerViolation, User};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{Auth, DB, Hash, Storage};
-use Illuminate\Support\Str;
 class VolunteerController extends Controller
 {
     /** Return the authenticated application user with a concrete model type for PHP and IDE analysis. */
@@ -24,10 +23,14 @@ class VolunteerController extends Controller
     {
         $user = $this->authenticatedUser();
         $driveQuery = CleanupDrive::with('organizer')
-            ->withCount(['registrations' => fn($q) => $q->whereNotIn('attendance_status', ['cancelled'])])
+            ->withCount(['registrations' => fn ($q) => $q->whereNotIn('attendance_status', ['cancelled'])])
+            ->where('start_at', '>', now())
+            ->where('status', '!=', 'cancelled')
             ->orderBy('start_at');
         if ($user->barangay_id) {
             $driveQuery->where('barangay_id', $user->barangay_id);
+        } else {
+            $driveQuery->whereRaw('1 = 0');
         }
         $drives = $driveQuery->get();
         $joined = $user
@@ -61,38 +64,72 @@ class VolunteerController extends Controller
         $front = $r->file('id_front')->store('volunteer-ids');
         $back = $r->file('id_back')?->store('volunteer-ids');
         VolunteerApplication::create(['user_id' => Auth::id(), 'status' => 'pending', 'id_type' => $data['id_type'], 'id_number' => $data['id_number'], 'id_front_path' => $front, 'id_back_path' => $back, 'guardian_name' => $data['guardian_name'] ?? null, 'guardian_phone' => $data['guardian_phone'] ?? null, 'organization_name' => $data['organization_name'] ?? null, 'organization_type' => $data['organization_type'] ?? null, 'organization_role' => $data['organization_role'] ?? null, 'skills' => $data['skills'] ?? [], 'availability' => $data['availability'] ?? [], 'emergency_contact_name' => $data['emergency_contact_name'], 'emergency_contact_phone' => $data['emergency_contact_phone'], 'emergency_contact_relationship' => $data['emergency_contact_relationship']]);
-        return redirect()->route('user-cleanup-drives')->with('notice', 'Application submitted. You will be notified after review.');
+        return redirect()->route('user-cleanup-drives')->with('notice', 'Application submitted. You can check its status on the Cleanup Drives page.');
     }
     public function myActivities()
     {
         $this->volunteer();
         $regs = $this->authenticatedUser()->cleanupRegistrations()->with('drive', 'evidence')->orderBy('registered_at', 'desc')->get();
         foreach ($regs as $reg) {
-            if (!$reg->verified_at && !$reg->penalty_processed_at && $reg->attendance_status === 'registered' && now()->between($reg->drive->start_at, $reg->drive->end_at)) {
-                $reg->attendance_status = 'ongoing';
-            } elseif (!$reg->verified_at && !$reg->penalty_processed_at && $reg->attendance_status === 'registered' && now()->greaterThan($reg->drive->end_at)) {
-                $reg->attendance_status = 'awaiting_verification';
+            $displayStatus = $reg->drive->status === 'cancelled' ? 'cancelled' : $reg->attendance_status;
+            if ($reg->drive->status !== 'cancelled' && !$reg->verified_at && !$reg->penalty_processed_at && $displayStatus === 'registered' && now()->between($reg->drive->start_at, $reg->drive->end_at)) {
+                $displayStatus = 'ongoing';
+            } elseif ($reg->drive->status !== 'cancelled' && !$reg->verified_at && !$reg->penalty_processed_at && $displayStatus === 'registered' && now()->greaterThan($reg->drive->end_at)) {
+                $displayStatus = 'awaiting_verification';
             }
+            $reg->setAttribute('display_status', $displayStatus);
         }
         return view('volunteer.activities', compact('regs'));
     }
     public function join(CleanupDrive $drive)
     {
         $this->volunteer();
-        abort_unless($drive->barangay_id === $this->authenticatedUser()->barangay_id, 404);
-        DB::transaction(function () use ($drive) {
-            $locked = CleanupDrive::lockForUpdate()->findOrFail($drive->id);
-            abort_unless($locked->status === 'scheduled' && $locked->start_at->isFuture(), 422, 'Registration is closed.');
-            abort_if(
-                $locked
-                    ->registrations()
-                    ->whereNotIn('attendance_status', ['cancelled'])
-                    ->count() >= $locked->slots,
-                422,
-                'This drive is full.',
-            );
-            CleanupDriveRegistration::firstOrCreate(['cleanup_drive_id' => $locked->id, 'volunteer_id' => Auth::id()], ['registered_at' => now(), 'attendance_status' => 'registered']);
+        $user = $this->authenticatedUser();
+        abort_unless($user->barangay_id && $drive->barangay_id === $user->barangay_id, 404);
+
+        DB::transaction(function () use ($drive, $user) {
+            $lockedDrive = CleanupDrive::query()->lockForUpdate()->findOrFail($drive->id);
+            abort_unless($lockedDrive->status === 'scheduled' && $lockedDrive->start_at->isFuture(), 422, 'Registration is closed.');
+
+            $registration = CleanupDriveRegistration::query()
+                ->where('cleanup_drive_id', $lockedDrive->id)
+                ->where('volunteer_id', $user->id)
+                ->lockForUpdate()
+                ->first();
+
+            if ($registration && $registration->attendance_status !== 'cancelled') {
+                abort(422, 'You already have a registration for this cleanup drive.');
+            }
+
+            $activeCount = $lockedDrive->registrations()
+                ->whereNotIn('attendance_status', ['cancelled'])
+                ->count();
+            abort_if($activeCount >= $lockedDrive->slots, 422, 'This drive is full.');
+
+            if ($registration) {
+                $oldEvidencePaths = $registration->evidence()->pluck('photo_path')->all();
+                Storage::disk('public')->delete($oldEvidencePaths);
+                $registration->evidence()->delete();
+                $registration->update([
+                    'registered_at' => now(),
+                    'attendance_status' => 'registered',
+                    'verification_method' => null,
+                    'verified_at' => null,
+                    'evidence_submitted_at' => null,
+                    'penalty_processed_at' => null,
+                    'points_awarded' => 0,
+                    'points_deducted' => 0,
+                ]);
+            } else {
+                CleanupDriveRegistration::create([
+                    'cleanup_drive_id' => $lockedDrive->id,
+                    'volunteer_id' => $user->id,
+                    'registered_at' => now(),
+                    'attendance_status' => 'registered',
+                ]);
+            }
         });
+
         return back()->with('notice', 'You are registered for this cleanup drive.');
     }
     public function cancel(CleanupDriveRegistration $registration)
@@ -107,29 +144,49 @@ class VolunteerController extends Controller
     {
         $this->volunteer();
         abort_unless($registration->volunteer_id === Auth::id(), 404);
-        abort_unless(now()->gte($registration->drive->start_at) && now()->lte($registration->drive->end_at->copy()->addDays(3)), 422, 'Evidence submission is only available during the event and within 3 days after it ends.');
-        abort_if($registration->verified_at, 422, 'Attendance is already verified.');
-        $data = $r->validate(['photos' => 'required|array|min:1|max:5', 'photos.*' => 'required|image|max:5120']);
-        foreach ($data['photos'] as $photo) {
-            $path = $photo->store('cleanup-evidence', 'public');
-            $registration->evidence()->create(['photo_path' => $path, 'uploaded_at' => now()]);
-        }
-        $registration->update(['evidence_submitted_at' => now(), 'attendance_status' => 'awaiting_verification']);
+        $data = $r->validate(['photos' => 'required|array|min:1|max:5', 'photos.*' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120']);
+
+        DB::transaction(function () use ($registration, $data) {
+            $locked = CleanupDriveRegistration::query()->lockForUpdate()->findOrFail($registration->id);
+            abort_unless($locked->drive->status !== 'cancelled' && !in_array($locked->attendance_status, ['cancelled', 'no_show'], true), 422, 'This registration is no longer eligible for evidence submission.');
+            abort_unless(now()->gte($locked->drive->start_at) && now()->lte($locked->drive->end_at->copy()->addDays(3)), 422, 'Evidence submission is only available during the event and within 3 days after it ends.');
+            abort_if($locked->verified_at, 422, 'Attendance is already verified.');
+            abort_if($locked->evidence_submitted_at || $locked->evidence()->exists() || $locked->verification_method, 422, 'You have already submitted your attendance proof. Only one verification method is allowed.');
+
+            foreach ($data['photos'] as $photo) {
+                $path = $photo->store('cleanup-evidence', 'public');
+                $locked->evidence()->create(['photo_path' => $path, 'uploaded_at' => now()]);
+            }
+            $locked->update(['evidence_submitted_at' => now(), 'attendance_status' => 'awaiting_verification']);
+        });
+
         return back()->with('notice', 'Photo evidence uploaded. It will be reviewed by the organizer.');
     }
     public function verifyCode(Request $r, CleanupDriveRegistration $registration)
     {
         $this->volunteer();
         abort_unless($registration->volunteer_id === Auth::id(), 404);
-        abort_unless(now()->gte($registration->drive->start_at) && now()->lte($registration->drive->end_at->copy()->addDays(3)), 422, 'Code verification is unavailable for this event.');
-        abort_if($registration->verified_at, 422, 'Attendance is already verified.');
-        $r->validate(['code' => 'required|string|max:24']);
-        if (!Hash::check(strtoupper($r->code), $registration->drive->attendance_code_hash)) {
-            return back()
-                ->withErrors(['code' => 'That attendance code is incorrect.'])
-                ->withInput();
+        $data = $r->validate(['code' => 'required|string|max:24']);
+
+        $verified = DB::transaction(function () use ($registration, $data) {
+            $locked = CleanupDriveRegistration::query()->lockForUpdate()->findOrFail($registration->id);
+            abort_unless($locked->drive->status !== 'cancelled' && !in_array($locked->attendance_status, ['cancelled', 'no_show'], true), 422, 'This registration is no longer eligible for verification.');
+            abort_unless(now()->gte($locked->drive->start_at) && now()->lte($locked->drive->end_at->copy()->addDays(3)), 422, 'Code verification is unavailable for this event.');
+            abort_if($locked->verified_at, 422, 'Attendance is already verified.');
+            abort_if($locked->evidence_submitted_at || $locked->evidence()->exists(), 422, 'Photo evidence has already been submitted. Only one verification method is allowed.');
+
+            if (!Hash::check(strtoupper(trim($data['code'])), $locked->drive->attendance_code_hash)) {
+                return false;
+            }
+
+            $this->verifyRegistration($locked, 'code');
+            return true;
+        });
+
+        if (!$verified) {
+            return back()->withErrors(['code' => 'That attendance code is incorrect.'])->withInput();
         }
-        $this->verifyRegistration($registration, 'code');
+
         return back()->with('notice', 'Attendance verified successfully.');
     }
     public function history()
@@ -138,7 +195,8 @@ class VolunteerController extends Controller
         $regs = $this->authenticatedUser()
             ->cleanupRegistrations()
             ->with(['drive', 'evidence'])
-            ->whereHas('drive', fn($q) => $q->where('start_at', '<=', now()))
+            ->where('attendance_status', '!=', 'cancelled')
+            ->whereHas('drive', fn ($q) => $q->where('start_at', '<=', now())->where('status', '!=', 'cancelled'))
             ->orderByDesc('updated_at')
             ->get();
         return view('volunteer.history', compact('regs'));
@@ -146,8 +204,10 @@ class VolunteerController extends Controller
     public function gallery(CleanupDrive $drive)
     {
         $this->volunteer();
-        abort_unless($drive->barangay_id === $this->authenticatedUser()->barangay_id, 404);
-        $evidence = CleanupDriveEvidence::with('registration.volunteer')->whereHas('registration', fn($q) => $q->where('cleanup_drive_id', $drive->id))->latest()->get();
+        $user = $this->authenticatedUser();
+        abort_unless($drive->barangay_id === $user->barangay_id && $drive->status !== 'cancelled', 404);
+        abort_unless($drive->registrations()->where('volunteer_id', $user->id)->where('attendance_status', '!=', 'cancelled')->exists(), 404);
+        $evidence = CleanupDriveEvidence::with('registration.volunteer')->whereHas('registration', fn ($q) => $q->where('cleanup_drive_id', $drive->id))->latest()->get();
         return view('volunteer.gallery', compact('drive', 'evidence'));
     }
     public function log()

@@ -1,0 +1,1 @@
+Before running a production Vite build, delete the existing public/hot file from your project root. This patch intentionally does not include that file because ZIP extraction cannot reliably delete an existing file.

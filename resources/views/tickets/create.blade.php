@@ -21,6 +21,10 @@
         <section class="ticket-form-panel">
             <form method="POST" action="{{ route('user-tickets.store') }}" enctype="multipart/form-data" id="ticketCreateForm" data-banned-words="{{ json_encode(config('ticketing.banned_words')) }}">
                 @csrf
+                @if (!empty($appealViolation))
+                    <input type="hidden" name="volunteer_violation_id" value="{{ $appealViolation->id }}">
+                    <div class="ticket-alert ticket-alert-info"><i class="fa-solid fa-scale-balanced"></i><span>This ticket will be linked to your penalty recorded on {{ $appealViolation->recorded_at->format('M d, Y') }} ({{ $appealViolation->points_deducted }} points deducted).</span></div>
+                @endif
                 <div class="ticket-form-section">
                     <div class="ticket-form-section-heading"><span>01</span><div><h2>Describe your concern</h2><p>All fields marked with * are required.</p></div></div>
 
@@ -29,7 +33,7 @@
                         <select id="category" name="category" required>
                             <option value="">Select a category</option>
                             @foreach ($categories as $value => $label)
-                                <option value="{{ $value }}" @selected(old('category') === $value)>{{ $label }}</option>
+                                <option value="{{ $value }}" @selected(old('category', !empty($appealViolation) ? 'volunteer_point_dispute' : '') === $value)>{{ $label }}</option>
                             @endforeach
                         </select>
                         @error('category')<small class="ticket-field-error">{{ $message }}</small>@enderror
@@ -55,6 +59,9 @@
                     <div class="ticket-form-section-heading"><span>02</span><div><h2>Add supporting information <em>Optional</em></h2><p>Attach one screenshot or link one of your existing waste reports.</p></div></div>
 
                     <div class="ticket-attachment-choice">
+                    @if (!empty($appealViolation))
+                        <div class="ticket-field ticket-report-select"><strong>Penalty being appealed</strong><p>{{ $appealViolation->description }} ({{ $appealViolation->points_deducted }} points deducted)</p></div>
+                    @endif
                         <div class="ticket-attachment-option">
                             <div class="ticket-attachment-option-icon"><i class="fa-regular fa-image"></i></div>
                             <div class="ticket-attachment-option-copy"><strong>Upload a screenshot</strong><small>JPG, PNG, or WEBP · Up to 5 MB</small></div>

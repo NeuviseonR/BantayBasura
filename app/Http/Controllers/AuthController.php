@@ -12,7 +12,6 @@ use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
 {
-    public const ZONES = ['Zone 1', 'Zone 2', 'Zone 3', 'Zone 4'];
     public const SEX   = ['Female', 'Male', 'Prefer not to say'];
     public const MIN_AGE = 13;
 
@@ -24,7 +23,6 @@ class AuthController extends Controller
 
         return view('login', [
             'barangays' => Barangay::orderBy('name')->get(),
-            'zones'     => self::ZONES,
             'sexes'     => self::SEX,
             'minAge'    => self::MIN_AGE,
         ]);
@@ -71,7 +69,6 @@ class AuthController extends Controller
             'sex'         => ['nullable', Rule::in(self::SEX)],
             'mobile'      => ['required', 'regex:/^(09\d{9}|\+639\d{9})$/', 'unique:users,mobile'],
             'barangay_id' => ['required', 'exists:barangays,id'],
-            'zone'        => ['required', Rule::in(self::ZONES)],
             'address'     => ['required', 'string', 'max:150'],
             'email'       => ['required', 'email', 'max:255', 'unique:users,email'],
             'password'    => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
@@ -94,7 +91,6 @@ class AuthController extends Controller
             'sex'         => $data['sex'] ?? null,
             'mobile'      => $data['mobile'],
             'barangay_id' => $data['barangay_id'],
-            'zone'        => $data['zone'],
             'address'     => $data['address'],
             'email'       => $data['email'],
             'password'    => Hash::make($data['password']),

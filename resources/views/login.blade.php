@@ -134,16 +134,7 @@
                         </select>
                         @error('barangay_id', 'register') <span class="field-error">{{ $message }}</span> @enderror
                     </div>
-                    <div class="form-group">
-                        <label for="zone">Zone</label>
-                        <select id="zone" name="zone" required>
-                            <option value="">Choose your zone</option>
-                            @foreach ($zones as $z)
-                                <option value="{{ $z }}" @selected(old('zone') === $z)>{{ $z }}</option>
-                            @endforeach
-                        </select>
-                        @error('zone', 'register') <span class="field-error">{{ $message }}</span> @enderror
-                    </div>
+
                 </div>
 
                 <div class="form-group">

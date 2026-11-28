@@ -11,6 +11,7 @@ class SupportTicket extends Model
     protected $fillable = [
         'user_id',
         'waste_report_id',
+        'volunteer_violation_id',
         'category',
         'title',
         'description',
@@ -36,6 +37,11 @@ class SupportTicket extends Model
     public function wasteReport(): BelongsTo
     {
         return $this->belongsTo(WasteReport::class);
+    }
+
+    public function volunteerViolation(): BelongsTo
+    {
+        return $this->belongsTo(VolunteerViolation::class);
     }
 
     public function assignee(): BelongsTo

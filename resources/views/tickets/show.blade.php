@@ -33,6 +33,9 @@
                     @if ($ticket->attachment_path)
                         <a href="{{ route('user-tickets.attachment', $ticket) }}" class="ticket-attachment-link"><i class="fa-regular fa-image"></i><span>{{ $ticket->attachment_original_name ?: 'View attached screenshot' }}</span><i class="fa-solid fa-download"></i></a>
                     @endif
+                    @if ($ticket->volunteerViolation)
+                        <div class="ticket-linked-report"><i class="fa-solid fa-scale-balanced"></i><div><small>Linked volunteer penalty appeal</small><strong>{{ $ticket->volunteerViolation->description }}</strong><span>{{ $ticket->volunteerViolation->points_deducted }} points deducted · {{ $ticket->volunteerViolation->recorded_at->format('M d, Y') }}</span></div></div>
+                    @endif
                     @if ($ticket->wasteReport)
                         <div class="ticket-linked-report"><i class="fa-regular fa-clipboard"></i><div><small>Linked waste report</small><strong>{{ $ticket->wasteReport->reference }} — {{ $ticket->wasteReport->title }}</strong><span>Status: {{ ucfirst($ticket->wasteReport->status) }}</span></div></div>
                     @endif

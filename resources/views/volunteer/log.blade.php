@@ -20,25 +20,23 @@
 <body>@include('partials.sidebar')<div class="main-wrapper">
         <header class="top-header">
             <div class="user-greeting">
-                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=120"
-                    alt="Maria Lopez" class="avatar-img"
-                    onerror="this.src='https://placehold.co/80x80/1e3a17/fff9a2?text=ML'">
+                @if (auth()->user()->profile_photo_path)
+                    <img src="{{ Storage::disk('public')->url(auth()->user()->profile_photo_path) }}" alt="{{ auth()->user()->name }}" class="avatar-img">
+                @else
+                    <div class="avatar-initials">{{ auth()->user()->initials }}</div>
+                @endif
                 <div class="greeting-text">
                     <h2>Hello, {{ auth()->user()->name }}!</h2>
                 </div>
             </div>
 
             <div class="top-actions">
-                <button class="notification-btn" aria-label="Notifications">
-                    <i class="fa-regular fa-bell"></i>
-                    <span class="notification-dot"></span>
-                </button>
 
                 <div class="profile-pill">
-                    <div class="avatar-initials">ML</div>
+                    <div class="avatar-initials">{{ auth()->user()->initials }}</div>
                     <div class="profile-info">
                         <div class="name">{{ auth()->user()->name }}</div>
-                        <div class="role">{{ auth()->user()->role }}</div>
+                        <div class="role">{{ ucfirst(auth()->user()->role) }}</div>
                     </div>
                     <i class="fa-solid fa-chevron-down dropdown-icon"></i>
                 </div>
@@ -50,8 +48,7 @@
             <p class="page-sub">Your points, tier, and violation records are tracked transparently.</p>
             <section class="points-overview">
                 <div><span>Points balance</span><strong>{{ $points }}</strong><small>points</small></div>
-                <div><span>Current tier</span><strong class="tier-name">{{ $tier }}</strong><small>Based on
-                        lifetime points balance</small></div>
+                <div><span>Current tier</span><strong class="tier-name">{{ $tier }}</strong><small>Based on your current points balance</small></div>
             </section>
             <section class="tier-guide">
                 <h2>Volunteer tiers</h2>
@@ -100,6 +97,7 @@
                                 <th>Violation</th>
                                 <th>Penalty</th>
                                 <th>Status</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -109,8 +107,15 @@
                                     <td>{{ $v->description }}</td>
                                     <td class="negative">-{{ $v->points_deducted }}</td>
                                     <td>{{ ucfirst($v->status) }}</td>
+                                    <td>
+                                        @if ($v->status === 'appealed')
+                                            <span class="muted">Appeal submitted</span>
+                                        @else
+                                            <a class="btn secondary small" href="{{ route('user-tickets.create', ['violation' => $v->id]) }}">Appeal deduction</a>
+                                        @endif
+                                    </td>
                             </tr>@empty<tr>
-                                    <td colspan="4" class="empty-cell">No violations recorded. Thank you for
+                                    <td colspan="5" class="empty-cell">No violations recorded. Thank you for
                                         participating responsibly.</td>
                                 </tr>
                             @endforelse

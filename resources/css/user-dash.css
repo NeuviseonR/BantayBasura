@@ -671,3 +671,5 @@ padding: 20px;
 margin-left: 0;
 }
 }
+
+.badge.rejected { background: #fff0ee; color: #963d34; border: 1px solid rgba(160, 55, 45, .2); }

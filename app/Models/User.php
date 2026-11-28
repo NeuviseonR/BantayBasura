@@ -12,7 +12,7 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'first_name', 'middle_name', 'last_name', 'birthdate', 'sex', 'mobile', 'barangay_id', 'zone', 'address', 'role', 'email', 'password', 'volunteer_points'];
+    protected $fillable = ['name', 'first_name', 'middle_name', 'last_name', 'birthdate', 'sex', 'mobile', 'barangay_id', 'zone', 'address', 'role', 'email', 'password', 'volunteer_points', 'profile_photo_path'];
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -52,6 +52,17 @@ class User extends Authenticatable
     public function supportTicketMessages(): HasMany
     {
         return $this->hasMany(SupportTicketMessage::class, 'sender_id');
+    }
+
+
+    public function getInitialsAttribute(): string
+    {
+        $parts = preg_split('/\s+/', trim((string) $this->name), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $initials = '';
+        foreach (array_slice($parts, 0, 2) as $part) {
+            $initials .= function_exists('mb_substr') ? mb_substr($part, 0, 1) : substr($part, 0, 1);
+        }
+        return strtoupper($initials ?: 'U');
     }
 
     public function isResident(): bool

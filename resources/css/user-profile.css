@@ -30,7 +30,7 @@ select:focus-visible {
     gap: 24px;
     padding: 28px 32px;
     border-radius: var(--radius-lg);
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--dark-text) 100%);
+    background: var(--primary-color);
     color: var(--light-contrast);
     box-shadow: var(--shadow-sm);
 }
@@ -521,3 +521,8 @@ select:focus-visible {
         transition: none;
     }
 }
+
+.pf-feedback { margin: 0 0 16px; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: #fff; }
+.pf-feedback.success { border-left: 4px solid var(--primary-color); }
+.pf-avatar-initials { display:flex; align-items:center; justify-content:center; color:var(--primary-color); font-size:1.8rem; font-weight:700; }
+.pf-error { display:block; color:#a12a20; font-size:.78rem; }

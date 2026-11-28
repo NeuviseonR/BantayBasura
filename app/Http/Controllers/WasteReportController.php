@@ -55,7 +55,6 @@ class WasteReportController extends Controller
         $report = WasteReport::create([
             'user_id'     => $user->id,
             'barangay_id' => $user->barangay_id,
-            'zone'        => $user->zone,
             'title'       => $data['title'],
             'category'    => $data['category'],
             'description' => $data['description'],

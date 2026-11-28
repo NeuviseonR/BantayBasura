@@ -69,10 +69,15 @@ class ResidentTicketController extends Controller
         }
 
         $reports = $user->wasteReports()->latest()->get();
+        $appealViolation = null;
+        if ($request->filled('violation')) {
+            $appealViolation = \App\Models\VolunteerViolation::query()->where('volunteer_id', $user->id)->whereKey($request->integer('violation'))->firstOrFail();
+        }
 
         return view('tickets.create', [
             'categories' => config('ticketing.categories'),
             'reports' => $reports,
+            'appealViolation' => $appealViolation,
         ]);
     }
 
@@ -86,6 +91,7 @@ class ResidentTicketController extends Controller
             'description' => ['required', 'string', 'min:20', 'max:' . config('ticketing.max_description_length', 3000)],
             'attachment' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:' . config('ticketing.max_attachment_kb', 5120)],
             'waste_report_id' => ['nullable', 'integer', 'exists:waste_reports,id'],
+            'volunteer_violation_id' => ['nullable', 'integer', 'exists:volunteer_violations,id'],
         ], [
             'category.required' => 'Please choose what your concern is about.',
             'title.min' => 'Please use a more descriptive title (at least 5 characters).',
@@ -106,6 +112,16 @@ class ResidentTicketController extends Controller
                 'attachment' => 'Please choose either an image attachment or an existing waste report, not both.',
                 'waste_report_id' => 'Please choose either an image attachment or an existing waste report, not both.',
             ]);
+        }
+
+        if (!empty($data['volunteer_violation_id'])) {
+            $ownsViolation = \App\Models\VolunteerViolation::query()->where('volunteer_id', $user->id)->whereKey($data['volunteer_violation_id'])->exists();
+            if (!$ownsViolation || $user->role !== 'volunteer') {
+                throw ValidationException::withMessages(['volunteer_violation_id' => 'You can only appeal one of your own volunteer penalties.']);
+            }
+            if ($data['category'] !== 'volunteer_point_dispute') {
+                throw ValidationException::withMessages(['category' => 'Choose the Volunteer Points / Penalty Appeal category for this appeal.']);
+            }
         }
 
         if (!empty($data['waste_report_id'])) {
@@ -144,9 +160,10 @@ class ResidentTicketController extends Controller
                 $attachmentMime = $file->getMimeType();
             }
 
-            return SupportTicket::create([
+            $ticket = SupportTicket::create([
                 'user_id' => $user->id,
                 'waste_report_id' => $data['waste_report_id'] ?? null,
+                'volunteer_violation_id' => $data['volunteer_violation_id'] ?? null,
                 'category' => $data['category'],
                 'title' => trim($data['title']),
                 'description' => trim($data['description']),
@@ -155,6 +172,12 @@ class ResidentTicketController extends Controller
                 'attachment_mime_type' => $attachmentMime,
                 'status' => 'open',
             ]);
+
+            if ($ticket->volunteer_violation_id) {
+                \App\Models\VolunteerViolation::whereKey($ticket->volunteer_violation_id)->update(['status' => 'appealed']);
+            }
+
+            return $ticket;
         });
 
         return redirect()->route('user-tickets.show', $ticket)
@@ -166,7 +189,7 @@ class ResidentTicketController extends Controller
         $user = $this->eligibleUser($request);
         abort_unless($ticket->user_id === $user->id, 404);
 
-        $ticket->load(['wasteReport', 'messages.sender']);
+        $ticket->load(['wasteReport', 'volunteerViolation', 'messages.sender']);
 
         return view('tickets.show', [
             'ticket' => $ticket,

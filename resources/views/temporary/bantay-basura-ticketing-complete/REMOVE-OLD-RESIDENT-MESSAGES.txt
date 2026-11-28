@@ -1,3 +1,0 @@
-Delete these obsolete files from the Laravel project after extracting the patch:
-- resources/views/user-messages.blade.php
-- resources/css/user-messages.css

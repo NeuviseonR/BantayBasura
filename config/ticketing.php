@@ -8,6 +8,7 @@ return [
         'website_suggestion' => 'Website Suggestion',
         'account_assistance' => 'Account Assistance',
         'volunteer_cleanup' => 'Volunteer / Cleanup Drive',
+        'volunteer_point_dispute' => 'Volunteer Points / Penalty Appeal',
         'other' => 'Other Concern',
     ],
 

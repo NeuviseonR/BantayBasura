@@ -19,8 +19,6 @@ export default defineConfig({
                 'resources/css/custom.css',
                 'resources/css/purok-dash.css',
                 'resources/css/user-profile.css',
-                'resources/css/user-tickets.css',
-                'resources/js/user-tickets.js',
                 'resources/css/purok-pages.css',
                 'resources/css/purok-activities-db.css',
                 'resources/css/staff-dashboards.css',
